@@ -26,10 +26,17 @@ purposes -- it does not use the LLM-driven loop. See "Dry-run mode" below.
 
 ## Windows quickstart (no Python experience assumed)
 
-If you're on Windows and haven't used Python before, follow this section
-top to bottom -- it's the same steps as "Installation" / "Running the
-agent" below, just spelled out with exact PowerShell commands and nothing
-assumed.
+**Easiest path: see [`WINDOWS_SETUP.md`](WINDOWS_SETUP.md).** Double-click
+`setup.bat` once, then `run-agent.bat` -- no commands to type. Both scripts
+check Python/Git, create the virtual environment, install dependencies,
+create `.env` for you, run the test suite, verify your API keys with live
+smoke tests, and only then run the agent. `.env` is never overwritten and
+never committed (see `.gitignore`); the scripts never contain or print any
+API key.
+
+The rest of this section is the manual, type-it-yourself PowerShell
+equivalent of the same steps, for anyone who prefers that or wants to see
+exactly what the scripts do.
 
 **1. Install Python** (skip if `python --version` in PowerShell already
 prints 3.11 or higher): download from https://www.python.org/downloads/,
