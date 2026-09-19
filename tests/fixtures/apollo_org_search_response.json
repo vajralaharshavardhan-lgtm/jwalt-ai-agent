@@ -1,0 +1,22 @@
+{
+  "_fixture_note": "SYNTHETIC fixture for testing request/response parsing. Shaped after Apollo's documented Organization Search response fields, but not a captured live payload -- paid endpoints were not called during development to avoid unnecessary credit spend. Verify field names against a real response before relying on this shape in production.",
+  "organizations": [
+    {
+      "id": "abc123def456abc123def456",
+      "name": "Palm Grove Hospitality Group",
+      "website_url": "https://www.palmgrovehospitality.ae",
+      "primary_domain": "palmgrovehospitality.ae",
+      "industry": "hospitality",
+      "keywords": ["hotels", "resorts", "hospitality management", "new hotel opening"],
+      "estimated_num_employees": 620,
+      "city": "Dubai",
+      "state": null,
+      "country": "United Arab Emirates",
+      "short_description": "Hospitality group operating hotels and resorts across the UAE, currently expanding with a new flagship property in Dubai Marina.",
+      "founded_year": 2009,
+      "linkedin_url": "https://www.linkedin.com/company/palm-grove-hospitality",
+      "primary_phone": {"number": "+971-4-555-0100"}
+    }
+  ],
+  "pagination": {"page": 1, "per_page": 25, "total_entries": 1, "total_pages": 1}
+}

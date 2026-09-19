@@ -1,0 +1,84 @@
+# Lead qualification rubric. The Qualification Agent (src/agents/qualification_agent.py)
+# reads this file at runtime — it contains no hardcoded scoring logic itself.
+# Edit weights/keywords/thresholds here to retune qualification without touching code.
+
+target_industries:
+  - hospitality
+  - hotel
+  - real estate
+  - property management
+  - property development
+  - retail
+  - restaurant
+  - food & beverage
+  - corporate office
+  - healthcare
+  - education
+  - construction
+  - architecture
+  - coworking
+
+target_locations:
+  - dubai
+  - united arab emirates
+  - uae
+  - abu dhabi
+  - sharjah
+
+# Apollo "organization_num_employees_ranges" buckets considered a good fit.
+# Too small = unlikely to commission a fit-out project; too large is not
+# excluded, just not weighted as an ideal-fit signal.
+ideal_employee_ranges:
+  - "51,200"
+  - "201,500"
+  - "501,1000"
+  - "1001,5000"
+
+# Free-text signals (matched case-insensitively against company description,
+# keyword tags, and job posting titles) that suggest an active or upcoming
+# fit-out need. This is the ONLY source of "evidence of projects" — the
+# Research Agent never invents project evidence that isn't backed by one of
+# these matched signals or a verified Apollo field.
+fit_out_signal_keywords:
+  - new opening
+  - expansion
+  - renovation
+  - refurbishment
+  - relocation
+  - new office
+  - flagship store
+  - new branch
+  - new hotel
+  - remodel
+  - fit-out
+  - fit out
+  - interior design
+  - office move
+
+decision_maker_titles:
+  - facilities manager
+  - head of facilities
+  - project manager
+  - director of operations
+  - general manager
+  - procurement manager
+  - head of real estate
+  - construction manager
+  - coo
+  - ceo
+  - owner
+  - managing director
+
+weights:
+  industry_match: 30
+  location_match: 20
+  employee_size_fit: 15
+  fit_out_signal: 20
+  decision_maker_found: 15
+
+# classification = HOT if score >= thresholds.hot, WARM if >= thresholds.warm,
+# COLD if >= thresholds.cold, else UNQUALIFIED.
+thresholds:
+  hot: 75
+  warm: 50
+  cold: 25

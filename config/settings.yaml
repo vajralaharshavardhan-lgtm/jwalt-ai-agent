@@ -1,0 +1,30 @@
+# Runtime configuration for the J-WALT BD agent. Secrets go in .env, not here.
+
+company:
+  name: "J-WALT"
+  industry: "Interior Fit-Out"
+  target_region: "Dubai, United Arab Emirates"
+
+database:
+  path: "data/leads.db"
+
+apollo:
+  base_url: "https://api.apollo.io/v1"
+  # Hard ceiling on outbound Apollo calls in a single run. The orchestrator's
+  # tool wrapper enforces this — it is not just a suggestion.
+  max_requests_per_run: 25
+  request_timeout_seconds: 30
+
+orchestrator:
+  model: "claude-sonnet-5"
+  max_iterations: 20
+  max_retries_per_step: 2
+
+approval:
+  # Only "cli" is implemented in the MVP. See README "What is still missing"
+  # for planned Slack/email approval channels.
+  channel: "cli"
+
+logging:
+  level: "INFO"
+  path: "data/agent.log"

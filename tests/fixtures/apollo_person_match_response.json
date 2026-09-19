@@ -1,0 +1,18 @@
+{
+  "_fixture_note": "SYNTHETIC fixture, not a captured live payload. See apollo_org_search_response.json note.",
+  "person": {
+    "id": "p1a2b3c4d5e6f7a8b9c0d1e2",
+    "first_name": "Sara",
+    "last_name": "Al Mansoori",
+    "name": "Sara Al Mansoori",
+    "title": "Facilities Manager",
+    "email": "sara.almansoori@palmgrovehospitality.ae",
+    "email_status": "verified",
+    "phone_numbers": [{"raw_number": "+971501234567", "sanitized_number": "+971501234567"}],
+    "linkedin_url": "https://www.linkedin.com/in/sara-almansoori-example",
+    "organization": {
+      "name": "Palm Grove Hospitality Group",
+      "primary_domain": "palmgrovehospitality.ae"
+    }
+  }
+}
