@@ -19,11 +19,64 @@ from src.agents.research_agent import ResearchAgent
 from src.approval.gate import ApprovalGate
 from src.config import get_settings
 from src.memory.store import Store
-from src.orchestrator.agentic_loop import AgenticOrchestrator
+from src.orchestrator.agentic_loop import AgenticOrchestrator, FatalToolError, MaxIterationsExceeded
 from src.orchestrator.context import OrchestratorContext
 from src.orchestrator.dry_run import run_dry_run
-from src.tools.apollo_client import ApolloClient
+from src.tools.apollo_client import ApolloClient, ApolloError
 from src.tools.llm_client import AnthropicLLMClient
+
+
+def _apollo_smoke_test() -> int:
+    """The smallest possible live Apollo call: enrich one well-known domain.
+    Costs at most 1 credit (0 if Apollo has no match). Never touches the
+    orchestrator, the database, or any other agent -- just proves the
+    credential and endpoint actually work.
+    """
+    settings = get_settings()
+    if not settings.apollo_api_key:
+        print("ERROR: APOLLO_API_KEY is not set. Add it to .env (see .env.example).", file=sys.stderr)
+        return 1
+
+    client = ApolloClient(
+        api_key=settings.apollo_api_key, base_url=settings.apollo_base_url,
+        timeout_seconds=settings.apollo_timeout_seconds, max_requests_per_run=1,
+    )
+    print("[LIVE] Apollo smoke test: GET /organizations/enrich?domain=apollo.io (<=1 credit)")
+    try:
+        org = client.enrich_organization("apollo.io")
+    except ApolloError as exc:
+        print(f"ERROR: Apollo smoke test failed -- {exc}", file=sys.stderr)
+        return 1
+    except Exception as exc:  # network-level failures (DNS, connection refused, proxy denial, etc.)
+        print(f"ERROR: Apollo smoke test failed -- could not reach Apollo: {exc}", file=sys.stderr)
+        return 1
+
+    if org:
+        print(f"[LIVE] SUCCESS -- Apollo returned real data: name={org.get('name')!r}, industry={org.get('industry')!r}")
+    else:
+        print("[LIVE] Apollo responded successfully but found no match for apollo.io (0 credits charged).")
+    print(f"[LIVE] Apollo requests made: {client.requests_made}")
+    return 0
+
+
+def _anthropic_smoke_test() -> int:
+    """The smallest possible live Anthropic call: a one-word completion.
+    Never touches the orchestrator, tools, or the database.
+    """
+    settings = get_settings()
+    if not settings.anthropic_api_key:
+        print("ERROR: ANTHROPIC_API_KEY is not set. Add it to .env (see .env.example).", file=sys.stderr)
+        return 1
+
+    llm = AnthropicLLMClient(api_key=settings.anthropic_api_key, model=settings.orchestrator_model)
+    print(f"[LIVE] Anthropic smoke test: one trivial completion, model={settings.orchestrator_model}")
+    try:
+        text = llm.complete(system="Reply with exactly one word and nothing else.", user="Say: OK", max_tokens=10)
+    except Exception as exc:
+        print(f"ERROR: Anthropic smoke test failed -- {exc}", file=sys.stderr)
+        return 1
+    print(f"[LIVE] SUCCESS -- model responded: {text!r}")
+    return 0
 
 
 def _run_real(objective: str, *, non_interactive: bool) -> int:
@@ -73,9 +126,20 @@ def _run_real(objective: str, *, non_interactive: bool) -> int:
         max_retries_per_step=settings.orchestrator_max_retries_per_step,
     )
 
-    print(f"Run {run_id} starting. Objective: {objective}\n")
-    summary = orchestrator.run(objective)
-    print(f"\n{'=' * 60}\nRun {run_id} finished.\n{'=' * 60}\n{summary}")
+    print(f"[LIVE] Run {run_id} starting. Objective: {objective}")
+    print(f"[LIVE] Apollo budget for this run: {settings.apollo_max_requests_per_run} requests\n")
+    try:
+        summary = orchestrator.run(objective)
+    except FatalToolError as exc:
+        print(f"\nERROR: run stopped -- {exc}", file=sys.stderr)
+        store.close()
+        return 1
+    except MaxIterationsExceeded as exc:
+        print(f"\nERROR: {exc}", file=sys.stderr)
+        store.close()
+        return 1
+
+    print(f"\n{'=' * 60}\n[LIVE] Run {run_id} finished.\n{'=' * 60}\n{summary}")
     store.close()
     return 0
 
@@ -85,7 +149,15 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true", help="Run the full pipeline safely: no writes to the real DB, nothing sent, works without credentials.")
     parser.add_argument("--objective", type=str, help="Plain-language objective for the real, LLM-driven orchestrator, e.g. 'Find 10 potential Dubai hotel clients for J-WALT'")
     parser.add_argument("--non-interactive", action="store_true", help="Auto-reject approval requests instead of prompting (real mode only; dry-run is always non-interactive).")
+    parser.add_argument("--apollo-smoke-test", action="store_true", help="Smallest possible live Apollo call (<=1 credit) to verify APOLLO_API_KEY works. No orchestrator, no DB writes.")
+    parser.add_argument("--anthropic-smoke-test", action="store_true", help="Smallest possible live Anthropic call (one word) to verify ANTHROPIC_API_KEY works. No orchestrator, no DB writes.")
     args = parser.parse_args()
+
+    if args.apollo_smoke_test:
+        return _apollo_smoke_test()
+
+    if args.anthropic_smoke_test:
+        return _anthropic_smoke_test()
 
     if args.dry_run:
         run_dry_run(get_settings())

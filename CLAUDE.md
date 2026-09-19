@@ -48,6 +48,12 @@ missing".
    `apollo.max_requests_per_run` from `config/settings.yaml`. Don't bypass it.
 6. **`--dry-run` must stay safe with zero configuration.** It must never
    write to the real DB file and must never require any API key to run.
+7. **Never fabricate data on a live-call failure.** In a real (`--objective`)
+   run, an `ApolloAuthError` or `ApolloBudgetExceededError` must abort the
+   whole run immediately (`FatalToolError` in `agentic_loop.py`) rather than
+   let the model retry a call that cannot succeed, and must never be
+   papered over with synthetic data -- that fallback exists only in
+   `dry_run.py`, always explicitly labeled `WOULD ...`.
 
 ## Known, confirmed limitation from development
 

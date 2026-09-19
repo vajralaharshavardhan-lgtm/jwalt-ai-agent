@@ -17,10 +17,19 @@ import anthropic
 from src.orchestrator import actions as A
 from src.orchestrator.context import OrchestratorContext
 from src.orchestrator.tools import TOOL_SCHEMAS, dispatch_tool
+from src.tools.apollo_client import ApolloAuthError, ApolloBudgetExceededError
 
 _PROMPT_PATH = (
     Path(__file__).resolve().parent.parent.parent / "config" / "prompts" / "orchestrator_system.md"
 )
+
+# Errors where retrying literally cannot help: the API key is wrong, or the
+# credit budget for this run is gone. Every subsequent call would fail
+# identically, so letting Claude "decide" whether to retry would just burn
+# iterations and tokens. These abort the run immediately instead -- this is
+# the concrete mechanism behind the safety rule "if Apollo fails, show the
+# actual error and stop rather than falling back to synthetic data."
+_FATAL_ERROR_TYPES = (ApolloAuthError, ApolloBudgetExceededError)
 
 
 def _load_system_prompt() -> str:
@@ -29,6 +38,13 @@ def _load_system_prompt() -> str:
 
 class MaxIterationsExceeded(Exception):
     pass
+
+
+class FatalToolError(Exception):
+    """Raised when a tool fails in a way retrying cannot fix (bad Apollo
+    credentials, exhausted credit budget). The run stops immediately rather
+    than looping or ever substituting fabricated data.
+    """
 
 
 class AgenticOrchestrator:
@@ -86,7 +102,22 @@ class AgenticOrchestrator:
                 try:
                     result = dispatch_tool(block.name, block.input, self._ctx)
                     consecutive_errors_by_tool[block.name] = 0
-                except Exception as exc:  # noqa: BLE001 -- any tool failure must reach Claude, not crash the run
+                except _FATAL_ERROR_TYPES as exc:
+                    self._ctx.store.run_logs.log(
+                        run_id=self._ctx.run_id, agent="orchestrator", action=block.name,
+                        status="ERROR", input_summary=json.dumps(block.input)[:500],
+                        error_message=f"FATAL (run aborted): {exc}",
+                    )
+                    self._ctx.store.run_logs.log(
+                        run_id=self._ctx.run_id, agent="orchestrator", action=A.ORCHESTRATOR_FINISHED,
+                        status="ERROR", error_message=str(exc),
+                    )
+                    raise FatalToolError(
+                        f"Tool '{block.name}' failed fatally: {exc}. Stopping the run immediately "
+                        "-- this is not something retrying could fix, and no synthetic data is "
+                        "substituted for a live run."
+                    ) from exc
+                except Exception as exc:  # noqa: BLE001 -- any other tool failure must reach Claude, not crash the run
                     count = consecutive_errors_by_tool.get(block.name, 0) + 1
                     consecutive_errors_by_tool[block.name] = count
                     result = {"error": str(exc)}

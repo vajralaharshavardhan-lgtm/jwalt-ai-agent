@@ -99,18 +99,40 @@ code, to retune behavior.
 python -m src.main --dry-run
 ```
 
+**Smoke tests (recommended before your first real run) -- verify each credential works in isolation, at minimal cost, with no orchestrator and no DB writes:**
+```bash
+python -m src.main --apollo-smoke-test      # one GET /organizations/enrich call, <=1 credit
+python -m src.main --anthropic-smoke-test   # one ~10-token completion
+```
+Both report clear SUCCESS/ERROR and never print the key itself. Run these
+first -- they isolate "is my credential valid and can I reach the API"
+from "does the full orchestrator work," which is a much smaller thing to
+debug if something's wrong.
+
 **Real, LLM-driven run (requires `ANTHROPIC_API_KEY` and `APOLLO_API_KEY`):**
 ```bash
-python -m src.main --objective "Find 10 potential Dubai hotel clients for J-WALT"
+python -m src.main --objective "Find 2 potential Dubai hotel clients for J-WALT"
 ```
 This will prompt you at the terminal (`[A]pprove / [R]eject / [E]dit?`)
 whenever the orchestrator has drafted an outreach email and wants to send
 it -- nothing is ever sent (there is no send integration at all yet), but
-the approval decision is recorded either way.
+the approval decision is recorded either way. Start with a small
+`target_count` (2-3) in your objective wording -- Apollo calls cost real
+credits, and this also bounds how many tool-use iterations the orchestrator
+needs.
 
 Pass `--non-interactive` to auto-reject approval requests instead of
 prompting (useful for a first hands-off test run; every draft will show up
 as "awaiting approval: 0, rejected: N" in the report rather than blocking).
+
+If Apollo fails for a reason that can't be fixed by retrying -- a rejected
+API key, or the run's Apollo credit budget (`apollo.max_requests_per_run`
+in `config/settings.yaml`) being exhausted -- the run stops immediately
+with the real error message and a non-zero exit code. It never falls back
+to synthetic/fabricated data during a real (`--objective`) run; that
+fallback only ever happens in `--dry-run`, and even there it's always
+labeled `[DRY RUN] ... WOULD SEARCH ...` so it's never mistaken for a live
+result.
 
 ## Dry-run mode: exactly what it does and doesn't do
 
