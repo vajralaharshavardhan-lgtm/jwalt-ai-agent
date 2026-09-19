@@ -24,6 +24,86 @@ before a draft could be sent, respect the Apollo credit budget).
 `--dry-run` is a separate, deterministic path used for safe testing/demo
 purposes -- it does not use the LLM-driven loop. See "Dry-run mode" below.
 
+## Windows quickstart (no Python experience assumed)
+
+If you're on Windows and haven't used Python before, follow this section
+top to bottom -- it's the same steps as "Installation" / "Running the
+agent" below, just spelled out with exact PowerShell commands and nothing
+assumed.
+
+**1. Install Python** (skip if `python --version` in PowerShell already
+prints 3.11 or higher): download from https://www.python.org/downloads/,
+run the installer, and **check the "Add python.exe to PATH" box** on the
+first screen before clicking Install.
+
+**2. Open PowerShell in the project folder.** In File Explorer, open the
+`jwalt-ai-agent` folder, then either right-click inside it and choose "Open
+in Terminal", or type `powershell` into the address bar and press Enter.
+
+**3. Create and activate a virtual environment** (a private, isolated copy
+of Python just for this project, so it can't conflict with anything else
+on your machine):
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
+```
+Your prompt should now start with `(.venv)`. Do this every time you open a
+new PowerShell window to work on this project -- it doesn't carry over.
+
+**4. Install the project's dependencies:**
+```powershell
+pip install -e ".[dev]"
+```
+
+**5. Create your personal `.env` file** (this holds your API keys and is
+never uploaded anywhere -- see "Environment variables" below):
+```powershell
+copy .env.example .env
+notepad .env
+```
+Notepad will open. Fill in the two blank lines so they look like:
+```
+ANTHROPIC_API_KEY=sk-ant-your-real-key-here
+APOLLO_API_KEY=your-real-apollo-key-here
+```
+Leave every other line exactly as it is. Save (Ctrl+S) and close Notepad.
+**Never paste these keys anywhere else** -- not into chat, not into a
+document, not into a screenshot.
+
+**6. Verify both keys work, before spending anything on a real search:**
+```powershell
+python -m src.main --anthropic-smoke-test
+python -m src.main --apollo-smoke-test
+```
+Each should print a line containing `SUCCESS`. If one fails, read the
+`ERROR:` line it prints -- it tells you plainly what's wrong (e.g. a typo
+in the key) and never shows the key itself.
+
+**7. Run the full pipeline safely first**, with no real API calls and no
+risk, to see how it behaves:
+```powershell
+python -m src.main --dry-run
+```
+Every line in this output is prefixed `[DRY RUN]` -- that's your signal
+this is a simulation, not real data. Nothing you see here was sent
+anywhere, and nothing was saved to your real database.
+
+**8. Run your first real, live test** (see "Your first live test" below
+for exactly what this does and what to expect):
+```powershell
+python -m src.main --objective "Find 3 potential Dubai hotel clients for J-WALT" --non-interactive
+```
+Every line here is prefixed `[LIVE]` instead -- that's real data from the
+real Apollo API and real Claude reasoning. `--non-interactive` means it
+will automatically decline to send anything rather than stopping to ask
+you at the terminal; drop that flag once you're ready to sit at the
+keyboard and personally approve, reject, or edit each draft.
+
+**9. Look at what got saved**, without needing any database software:
+```powershell
+python -c "from src.memory.store import Store; s = Store('data/leads.db'); [print(l) for l in s.leads.search()]"
+```
+
 ## Architecture
 
 ```
@@ -133,6 +213,46 @@ to synthetic/fabricated data during a real (`--objective`) run; that
 fallback only ever happens in `--dry-run`, and even there it's always
 labeled `[DRY RUN] ... WOULD SEARCH ...` so it's never mistaken for a live
 result.
+
+## Your first live test
+
+```bash
+python -m src.main --objective "Find 3 potential Dubai hotel clients for J-WALT" --non-interactive
+```
+
+What this actually does, step by step, all real:
+1. Claude reads the objective and calls `search_companies` with a Dubai
+   location filter and `target_count: 3` -- a real, credit-consuming Apollo
+   API call.
+2. For each company Apollo returns, it checks the local SQLite database for
+   an existing match (domain, then normalized name) before doing anything
+   else -- so re-running this same objective later won't create duplicates.
+3. It calls `find_contacts` to look for a decision-maker at each company
+   (another real Apollo call).
+4. It runs the qualification rubric (`config/scoring.yaml`) -- no API call,
+   deterministic -- and classifies each company HOT/WARM/COLD/UNQUALIFIED.
+5. Qualified companies (and their contact, if found) are saved to
+   `data/leads.db`.
+6. For each stored lead with a contact, it calls `draft_outreach` -- a real
+   Claude call that writes a personalized email grounded only in the facts
+   it actually gathered -- and immediately calls `request_human_approval`.
+   With `--non-interactive`, that auto-rejects (nothing is ever sent
+   regardless -- there is no send code in this project at all). Drop the
+   flag to sit at the `[A]pprove / [R]eject / [E]dit?` prompt yourself.
+7. It calls `generate_report` and then `finish`.
+
+**No bulk actions happen anywhere in this path**: `target_count: 3` bounds
+the search, there is no "send all" or "approve all" tool, and each
+outreach draft is approved/rejected one at a time.
+
+**LIVE vs DRY RUN, at a glance:** a `--dry-run` run prefixes every action
+line `[DRY RUN]` (and, for any step where no API key was configured, says
+`WOULD SEARCH` / `WOULD DRAFT` / `WOULD SEND` instead of doing it), and its
+run id always starts with `dryrun-` (visible in the report header too). A
+real run prefixes its start/budget/finish lines `[LIVE]`, gets a run id
+starting with `run-`, and everything in between is the model's own tool
+calls and their real results. The two paths share no code (`dry_run.py` vs
+`agentic_loop.py`), so there's no way for one to be mistaken for the other.
 
 ## Dry-run mode: exactly what it does and doesn't do
 
