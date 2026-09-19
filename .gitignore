@@ -7,4 +7,5 @@ venv/
 .env
 data/*.db
 data/*.log
+data/.current_run_id
 !data/.gitkeep
