@@ -17,9 +17,13 @@ export function frame(img, rect, cam = {}) {
   const s = cover * zoom;
   let ox = rect.x + rect.w / 2 - (cam.cx ?? 0.5) * img.w * s + (cam.px ?? 0);
   let oy = rect.y + rect.h / 2 - (cam.cy ?? 0.5) * img.h * s + (cam.py ?? 0);
-  // the photograph must always cover its aperture -- no empty edges
-  ox = Math.min(rect.x, Math.max(rect.x + rect.w - img.w * s, ox));
-  oy = Math.min(rect.y, Math.max(rect.y + rect.h - img.h * s, oy));
+  // the photograph must always cover its aperture -- no empty edges.
+  // `free` lifts the clamp for window parallax on sliding plates; callers use
+  // it only while the uncovered edge is outside the frame.
+  if (!cam.free) {
+    ox = Math.min(rect.x, Math.max(rect.x + rect.w - img.w * s, ox));
+    oy = Math.min(rect.y, Math.max(rect.y + rect.h - img.h * s, oy));
+  }
   return {
     s, ox, oy,
     upscale: s / (img.density ?? 1), // >1 means source pixels are being enlarged

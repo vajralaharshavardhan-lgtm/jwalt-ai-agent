@@ -143,22 +143,49 @@ export function text(ctx, str, x, y, st, { align = 'left', alpha = 1 } = {}) {
   ctx.restore();
 }
 
+// Canvas snaps glyphs to whole pixels, so slowly moving text would judder
+// (moving only on some frames). Moving text is therefore rasterised once into
+// a greyscale sprite and drawn at true sub-pixel positions; text at rest is
+// snapped to the pixel grid so it stays razor-sharp.
+const SPRITES = new Map();
+function sprite(str, st) {
+  const key = `${str}|${st.size}|${st.weight}|${st.track}|${st.color}`;
+  let s = SPRITES.get(key);
+  if (s) return s;
+  const probe = document.createElement('canvas').getContext('2d');
+  const w = measure(probe, str, st);
+  const pad = Math.ceil(st.size * 0.25);
+  const asc = Math.ceil(st.size * 1.05), desc = Math.ceil(st.size * 0.35);
+  const c = document.createElement('canvas');
+  c.width = Math.ceil(w + st.size + 2 * pad);
+  c.height = asc + desc;
+  const g = c.getContext('2d', { alpha: true });
+  setFont(g, st);
+  g.fillText(str, pad, asc);
+  s = { c, pad, asc, w };
+  SPRITES.set(key, s);
+  return s;
+}
+
 // Text that rises out of its own baseline, as if emerging from a drawn line.
 // p=0 hidden below the baseline, p=1 in place. Reverse p for an exit.
 export function maskedText(ctx, str, x, y, st, p, { align = 'left', alpha = 1, rise } = {}) {
   if (p <= 0 || alpha <= 0) return;
-  const x0 = alignedX(ctx, str, x, st, align);
-  const w = measure(ctx, str, st);
+  const x0 = Math.round(alignedX(ctx, str, x, st, align));
+  const sp = sprite(str, st);
   const d = rise ?? st.size * 1.05;
+  const offset = (1 - clamp(p)) * d;
+  const yy = offset < 0.01 ? Math.round(y) : y + offset;
   ctx.save();
   ctx.beginPath();
-  // the mask must include the descender zone: clipping at the baseline would
-  // cut comma tails ("5,600" -> "5.600") and the tail of the Q
-  ctx.rect(x0 - st.size, y - st.size * 1.3, w + st.size * 2, st.size * 1.3 + (st.descend ?? st.size * 0.3));
+  // the mask includes the descender zone: clipping at the baseline would cut
+  // comma tails ("5,600" -> "5.600") and the tail of the Q
+  ctx.rect(x0 - st.size, y - st.size * 1.3, sp.w + st.size * 2, st.size * 1.3 + (st.descend ?? st.size * 0.3));
   ctx.clip();
-  setFont(ctx, st);
   ctx.globalAlpha = alpha;
-  ctx.fillText(str, x0, y + (1 - clamp(p)) * d);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(sp.c, x0 - sp.pad, yy - sp.asc);
   ctx.restore();
 }
 

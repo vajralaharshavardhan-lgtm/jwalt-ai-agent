@@ -6,9 +6,10 @@ FFmpeg to encode, and Python for asset analysis and QA. It uses only real J-WALT
 photography from the supplied source pack. No AI video or image generation and no editing
 suite are involved.
 
-**Current state:** Phase 1 (direction). See [PHASE1.md](PHASE1.md) for the beat map, shot
-list, transition map, visual system and open questions, and `output/keyframes/` for the four
-keyframe stills (awaiting approval). The full video is not rendered yet.
+**Current state:** complete. The master is `output/j-walt-brand-film.mp4` (1920×1080, 60 fps,
+H.264, AAC). [PRODUCTION.md](PRODUCTION.md) has the final edit, the source of every on-screen
+fact, the review iterations and the QA results. [PHASE1.md](PHASE1.md) is the original
+direction document.
 
 ## Layout
 
@@ -20,7 +21,8 @@ assets/portfolio/       photos cropped from the source pack + registered line dr
 assets/logo/            vectorised J-WALT wordmark (svg + json path data)
 assets/fonts/           Inter Tight (SIL OFL 1.1, see OFL.txt)
 analysis/               extraction, logo vectorisation, line registration, QA, catalogue
-render/                 static server + still renderer (video renderer comes in Phase 2)
+render/                 static server, still renderer, video renderer (frames piped into FFmpeg)
+audio/                  original score + sound design, synthesised in code
 output/keyframes/       rendered keyframes
 ```
 
@@ -30,7 +32,7 @@ Requirements: Node 18+, Python 3.10+, Chromium via Playwright.
 
 ```
 npm install                                   # playwright (browsers are provided separately)
-pip install pymupdf pillow numpy potracer imageio-ffmpeg
+pip install pymupdf pillow numpy scipy potracer imageio-ffmpeg
 
 # re-extract assets from the source pack (only needed if the pack changes)
 python analysis/extract_assets.py /path/to/J-WALT-Brand-Film-Source-Pack.pdf
@@ -42,8 +44,14 @@ python analysis/snap_lines.py heid-reception
 node render/stills.js
 node render/stills.js 2.5 13.62               # -> render/frames/
 
+# sound, then the film (FFmpeg with libx264 on PATH, or set $FFMPEG)
+python audio/score.py
+node render/video.js                          # final master
+node render/video.js --preview                # quick 30 fps check
+
 # QA
 python analysis/qa_frames.py output/keyframes/*.png
+python analysis/qa_video.py output/j-walt-brand-film.mp4 sheet.jpg
 
 # interactive preview
 npm run serve                                 # then open http://localhost:8123/?preview

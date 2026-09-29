@@ -13,7 +13,7 @@ const ROOT = path.resolve(__dirname, '..');
 const KEYFRAMES = [
   { t: 3.55, name: 'kf1-opening-from-an-idea' },
   { t: 6.6, name: 'kf2-project-heidelberg' },
-  { t: 13.62, name: 'kf3-services-transition' },
+  { t: 14.6, name: 'kf3-services' },
   { t: 29.0, name: 'kf4-brand-end-frame' },
 ];
 

@@ -2,3 +2,5 @@ node_modules/
 analysis/pages/
 render/frames/
 output/*.mp4
+!output/j-walt-brand-film.mp4
+output/*.wav

@@ -15,6 +15,7 @@ export const VIEWS = {
   'heid2-hall':         ['heid2-hall', 21, 'Heidelberg (12,647 sq ft)'],
   'corys-openplan':     ['corys-openplan-b', 10, 'Corys Piping Systems', { sx: 0, sy: 16, w: 882, h: 942 }], // excludes logo fragment, top edge
   'omoda-reception':    ['omoda-reception', 14, 'OMODA | JAECOO', { sx: 290, sy: 355, w: 950, h: 534 }], // excludes garland + flags
+  'snoc-shelving':      ['snoc-shelving-built', 13, 'SNOC', { sx: 0, sy: 0, w: 980, h: 700 }],          // excludes paper on sofa, bottom
   'snoc-boardroom':     ['snoc-boardroom-built', 13, 'SNOC', { sx: 0, sy: 0, w: 1008, h: 800 }],        // excludes leaflet, bottom
 };
 
