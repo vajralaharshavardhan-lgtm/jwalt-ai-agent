@@ -1,0 +1,37 @@
+{
+  "name": "premium-seeds-film",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cinematic brand film for Premium Seeds (Bengaluru) built with Remotion.",
+  "type": "module",
+  "scripts": {
+    "prepare-assets": "node scripts/scan-assets.mjs && node scripts/audio/generate-soundtrack.mjs --if-missing",
+    "studio": "npm run prepare-assets && remotion studio src/index.ts",
+    "render": "npm run prepare-assets && remotion render src/index.ts PremiumSeedsFilm out/premium-seeds-16x9.mp4",
+    "render:vertical": "npm run prepare-assets && remotion render src/index.ts PremiumSeedsFilmVertical out/premium-seeds-9x16.mp4",
+    "render:preview": "npm run prepare-assets && remotion render src/index.ts PremiumSeedsFilm out/premium-seeds-preview-540p.mp4 --scale=0.5 --crf=26",
+    "render:guide": "npm run prepare-assets && remotion render src/index.ts AssetGuide out/premium-seeds-asset-guide.mp4 --scale=0.5",
+    "render:all": "npm run render && npm run render:vertical",
+    "stills": "npm run prepare-assets && node scripts/render-stills.mjs",
+    "audio": "node scripts/audio/generate-soundtrack.mjs",
+    "assets:scan": "node scripts/scan-assets.mjs",
+    "extract-brand": "node scripts/extract-brand.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.529",
+    "@remotion/cli": "4.0.529",
+    "@remotion/fonts": "4.0.529",
+    "@remotion/noise": "4.0.529",
+    "@remotion/renderer": "4.0.529",
+    "d3-delaunay": "6.0.4",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.529"
+  },
+  "devDependencies": {
+    "@types/d3-delaunay": "6.0.4",
+    "@types/react": "18.3.12",
+    "typescript": "5.6.3"
+  }
+}

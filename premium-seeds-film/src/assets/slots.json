@@ -1,0 +1,84 @@
+{
+  "$comment": "Asset slots. Drop a file named <id>.<ext> into public/assets/ and it is used automatically (run `npm run assets:scan`, or just start studio/render). Without a file, the film renders its built-in procedural visual for that moment.",
+  "slots": [
+    {
+      "id": "logo",
+      "scene": "09 Final reveal",
+      "kinds": ["svg", "png", "webp"],
+      "time": "0:41–0:45",
+      "description": "Official Premium Seeds logo. Transparent SVG or PNG, light version for dark background (or dark logo; see README: logo is tinted cream by default).",
+      "fallback": "Typographic wordmark 'PREMIUM SEEDS' (no invented symbol)."
+    },
+    {
+      "id": "research-breeder",
+      "scene": "03 Research",
+      "kinds": ["jpg", "jpeg", "png", "webp", "mp4", "webm", "mov"],
+      "time": "0:08–0:13",
+      "description": "Real photo/clip of a Premium Seeds breeder examining plants, or the company's research facility. Landscape, subject on the right half, darkish background preferred.",
+      "fallback": "Botanical research plate (line-art seedling, leaf-cell micrograph, F1 cross diagram)."
+    },
+    {
+      "id": "field-wide",
+      "scene": "04 Field validation",
+      "kinds": ["jpg", "jpeg", "png", "webp", "mp4", "webm", "mov"],
+      "time": "0:15–0:18",
+      "description": "Real wide shot of the company's trial field: crop rows, low sun, ideally a person walking the rows. Landscape.",
+      "fallback": "Procedural perspective field at golden hour (no people)."
+    },
+    {
+      "id": "crop-chilli",
+      "scene": "05 Crop portfolio",
+      "kinds": ["jpg", "jpeg", "png", "webp"],
+      "time": "0:18",
+      "description": "Close-up of a Premium Seeds chilli (fruit on dark/neutral background works best).",
+      "fallback": "Botanical illustration."
+    },
+    {"id": "crop-cucumber", "scene": "05 Crop portfolio", "kinds": ["jpg", "jpeg", "png", "webp"], "time": "0:19", "description": "Close-up of cucumber.", "fallback": "Botanical illustration."},
+    {"id": "crop-watermelon", "scene": "05 Crop portfolio", "kinds": ["jpg", "jpeg", "png", "webp"], "time": "0:19", "description": "Close-up of watermelon.", "fallback": "Botanical illustration."},
+    {"id": "crop-bitter-gourd", "scene": "05 Crop portfolio", "kinds": ["jpg", "jpeg", "png", "webp"], "time": "0:20", "description": "Close-up of bitter gourd.", "fallback": "Botanical illustration."},
+    {"id": "crop-bottle-gourd", "scene": "05 Crop portfolio", "kinds": ["jpg", "jpeg", "png", "webp"], "time": "0:20", "description": "Close-up of bottle gourd.", "fallback": "Botanical illustration."},
+    {"id": "crop-ridge-gourd", "scene": "05 Crop portfolio", "kinds": ["jpg", "jpeg", "png", "webp"], "time": "0:21", "description": "Close-up of ridge gourd.", "fallback": "Botanical illustration."},
+    {"id": "crop-tomato", "scene": "05 Crop portfolio", "kinds": ["jpg", "jpeg", "png", "webp"], "time": "0:21", "description": "Close-up of tomato.", "fallback": "Botanical illustration."},
+    {"id": "crop-okra", "scene": "05 Crop portfolio", "kinds": ["jpg", "jpeg", "png", "webp"], "time": "0:22", "description": "Close-up of okra.", "fallback": "Botanical illustration."},
+    {
+      "id": "topgun-product",
+      "scene": "06 Top Gun F1",
+      "kinds": ["png", "webp", "jpg", "jpeg"],
+      "time": "0:24–0:29",
+      "description": "Top Gun F1 product image from the website (ideally a cut-out PNG of the chilli on transparency, or a dark-background photo).",
+      "fallback": "Procedural macro chilli (green ripening to red)."
+    },
+    {
+      "id": "harvest-farmer",
+      "scene": "07 Farmer & harvest",
+      "kinds": ["jpg", "jpeg", "png", "webp", "mp4", "webm", "mov"],
+      "time": "0:29–0:31",
+      "description": "Real photo/clip of a farmer inspecting a crop grown from Premium Seeds (with consent).",
+      "fallback": "Procedural backlit chilli canopy at golden hour."
+    },
+    {
+      "id": "harvest-hands",
+      "scene": "07 Farmer & harvest",
+      "kinds": ["jpg", "jpeg", "png", "webp", "mp4", "webm", "mov"],
+      "time": "0:31–0:33",
+      "description": "Close-up of hands touching plants / harvesting.",
+      "fallback": "Procedural backlit chilli canopy at golden hour."
+    },
+    {
+      "id": "harvest-basket",
+      "scene": "07 Farmer & harvest",
+      "kinds": ["jpg", "jpeg", "png", "webp", "mp4", "webm", "mov"],
+      "time": "0:33–0:35",
+      "description": "Basket / crate of harvested vegetables in sunlight.",
+      "fallback": "Procedural backlit chilli canopy at golden hour."
+    },
+    {
+      "id": "music",
+      "scene": "Soundtrack",
+      "kinds": ["mp3", "wav", "m4a", "aac", "ogg"],
+      "time": "0:00–0:45",
+      "description": "Licensed music track. Replaces the generated score (the generated sound-design layer stays; see README to mute it).",
+      "fallback": "Generated minimal cinematic score (scripts/audio)."
+    }
+  ]
+}

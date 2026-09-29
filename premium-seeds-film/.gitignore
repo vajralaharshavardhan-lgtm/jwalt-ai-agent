@@ -1,0 +1,7 @@
+node_modules/
+out/
+# Generated on demand by `npm run audio` (runs automatically before studio/render)
+public/audio/generated/
+# Output of `npm run extract-brand`
+brand-extract/
+.DS_Store
