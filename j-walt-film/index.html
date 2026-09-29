@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>J-WALT Brand Film</title>
+<style>
+  @font-face {
+    font-family: "Inter Tight";
+    src: url("assets/fonts/InterTight-VariableFont_wght.ttf") format("truetype");
+    font-weight: 100 900;
+    font-style: normal;
+  }
+  html, body { margin: 0; background: #F2F0EB; }
+  canvas { display: block; }
+  body.preview { background: #1d1d1b; color: #d9d6cf; font: 13px "Inter Tight", sans-serif; }
+  body.preview canvas { width: min(100vw, calc((100vh - 56px) * 16 / 9)); height: auto; margin: 0 auto; }
+  #bar { display: none; gap: 12px; align-items: center; padding: 12px 16px; }
+  body.preview #bar { display: flex; }
+  #bar input[type=range] { flex: 1; }
+</style>
+</head>
+<body>
+<canvas id="film" width="1920" height="1080"></canvas>
+<div id="bar"><button id="play">Play</button><input id="scrub" type="range" min="0" max="30" step="0.0166667" value="0"><span id="time">0.00s</span></div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

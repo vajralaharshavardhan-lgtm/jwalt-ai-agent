@@ -1,0 +1,326 @@
+{
+  "about-office": {
+    "page": 2,
+    "box_native": [
+      46,
+      115,
+      1177,
+      867
+    ],
+    "width": 1131,
+    "height": 752,
+    "file": "assets/portfolio/about-office.jpg"
+  },
+  "heid-reception": {
+    "page": 5,
+    "box_native": [
+      67,
+      115,
+      1060,
+      1098
+    ],
+    "width": 993,
+    "height": 983,
+    "file": "assets/portfolio/heid-reception.jpg"
+  },
+  "heid-boardroom": {
+    "page": 6,
+    "box_native": [
+      61,
+      154,
+      982,
+      1071
+    ],
+    "width": 921,
+    "height": 917,
+    "file": "assets/portfolio/heid-boardroom.jpg"
+  },
+  "heid-teamwork-joinery": {
+    "page": 6,
+    "box_native": [
+      1021,
+      154,
+      1935,
+      1070
+    ],
+    "width": 914,
+    "height": 916,
+    "file": "assets/portfolio/heid-teamwork-joinery.jpg"
+  },
+  "heid-corridor-glass": {
+    "page": 7,
+    "box_native": [
+      39,
+      147,
+      790,
+      1084
+    ],
+    "width": 751,
+    "height": 937,
+    "file": "assets/portfolio/heid-corridor-glass.jpg"
+  },
+  "heid-private-office": {
+    "page": 7,
+    "box_native": [
+      832,
+      147,
+      1947,
+      1085
+    ],
+    "width": 1115,
+    "height": 938,
+    "file": "assets/portfolio/heid-private-office.jpg"
+  },
+  "heid-curved-glass": {
+    "page": 8,
+    "box_native": [
+      44,
+      143,
+      804,
+      1096
+    ],
+    "width": 760,
+    "height": 953,
+    "file": "assets/portfolio/heid-curved-glass.jpg"
+  },
+  "heid-stained-corridor": {
+    "page": 8,
+    "box_native": [
+      841,
+      143,
+      1963,
+      1104
+    ],
+    "width": 1122,
+    "height": 961,
+    "file": "assets/portfolio/heid-stained-corridor.jpg"
+  },
+  "corys-openplan-a": {
+    "page": 9,
+    "box_native": [
+      3,
+      161,
+      724,
+      1063
+    ],
+    "width": 721,
+    "height": 902,
+    "file": "assets/portfolio/corys-openplan-a.jpg"
+  },
+  "corys-glass-a": {
+    "page": 9,
+    "box_native": [
+      716,
+      239,
+      1272,
+      1063
+    ],
+    "width": 556,
+    "height": 824,
+    "file": "assets/portfolio/corys-glass-a.jpg"
+  },
+  "corys-glass-b": {
+    "page": 10,
+    "box_native": [
+      85,
+      144,
+      1021,
+      1088
+    ],
+    "width": 936,
+    "height": 944,
+    "file": "assets/portfolio/corys-glass-b.jpg"
+  },
+  "corys-openplan-b": {
+    "page": 10,
+    "box_native": [
+      1062,
+      131,
+      1944,
+      1089
+    ],
+    "width": 882,
+    "height": 958,
+    "file": "assets/portfolio/corys-openplan-b.jpg"
+  },
+  "snoc-boardroom-render": {
+    "page": 11,
+    "box_native": [
+      3,
+      198,
+      1390,
+      1010
+    ],
+    "width": 1387,
+    "height": 812,
+    "file": "assets/portfolio/snoc-boardroom-render.jpg"
+  },
+  "snoc-reception-render": {
+    "page": 12,
+    "box_native": [
+      191,
+      88,
+      1325,
+      1088
+    ],
+    "width": 1134,
+    "height": 1000,
+    "file": "assets/portfolio/snoc-reception-render.jpg"
+  },
+  "snoc-boardroom-built": {
+    "page": 13,
+    "box_native": [
+      21,
+      195,
+      1029,
+      1122
+    ],
+    "width": 1008,
+    "height": 927,
+    "file": "assets/portfolio/snoc-boardroom-built.jpg"
+  },
+  "snoc-shelving-built": {
+    "page": 13,
+    "box_native": [
+      1017,
+      181,
+      1997,
+      1122
+    ],
+    "width": 980,
+    "height": 941,
+    "file": "assets/portfolio/snoc-shelving-built.jpg"
+  },
+  "omoda-reception": {
+    "page": 14,
+    "box_native": [
+      3,
+      163,
+      1275,
+      1052
+    ],
+    "width": 1272,
+    "height": 889,
+    "file": "assets/portfolio/omoda-reception.jpg"
+  },
+  "omoda-workspace-a": {
+    "page": 15,
+    "box_native": [
+      64,
+      170,
+      1035,
+      1087
+    ],
+    "width": 971,
+    "height": 917,
+    "file": "assets/portfolio/omoda-workspace-a.jpg"
+  },
+  "omoda-workspace-b": {
+    "page": 15,
+    "box_native": [
+      1081,
+      163,
+      1977,
+      1088
+    ],
+    "width": 896,
+    "height": 925,
+    "file": "assets/portfolio/omoda-workspace-b.jpg"
+  },
+  "omoda-boardroom": {
+    "page": 16,
+    "box_native": [
+      52,
+      109,
+      997,
+      1101
+    ],
+    "width": 945,
+    "height": 992,
+    "file": "assets/portfolio/omoda-boardroom.jpg"
+  },
+  "omoda-workspace-c": {
+    "page": 16,
+    "box_native": [
+      1036,
+      108,
+      1904,
+      1101
+    ],
+    "width": 868,
+    "height": 993,
+    "file": "assets/portfolio/omoda-workspace-c.jpg"
+  },
+  "wilh-reception-render": {
+    "page": 17,
+    "box_native": [
+      19,
+      209,
+      1259,
+      1042
+    ],
+    "width": 1240,
+    "height": 833,
+    "file": "assets/portfolio/wilh-reception-render.jpg"
+  },
+  "wilh-openplan-a": {
+    "page": 18,
+    "box_native": [
+      3,
+      199,
+      1201,
+      1010
+    ],
+    "width": 1198,
+    "height": 811,
+    "file": "assets/portfolio/wilh-openplan-a.jpg"
+  },
+  "wilh-openplan-b": {
+    "page": 18,
+    "box_native": [
+      1235,
+      199,
+      1997,
+      1010
+    ],
+    "width": 762,
+    "height": 811,
+    "file": "assets/portfolio/wilh-openplan-b.jpg"
+  },
+  "heid2-hall": {
+    "page": 21,
+    "box_native": [
+      21,
+      182,
+      724,
+      1012
+    ],
+    "width": 703,
+    "height": 830,
+    "file": "assets/portfolio/heid2-hall.jpg"
+  },
+  "heid2-window": {
+    "page": 21,
+    "box_native": [
+      756,
+      182,
+      1372,
+      1012
+    ],
+    "width": 616,
+    "height": 830,
+    "file": "assets/portfolio/heid2-window.jpg"
+  },
+  "heid2-blinds": {
+    "page": 21,
+    "box_native": [
+      1403,
+      182,
+      1973,
+      1011
+    ],
+    "width": 570,
+    "height": 829,
+    "file": "assets/portfolio/heid2-blinds.jpg"
+  }
+}

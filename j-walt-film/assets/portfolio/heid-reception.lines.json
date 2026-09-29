@@ -1,0 +1,357 @@
+{
+ "asset": "heid-reception",
+ "size": [
+  993,
+  983
+ ],
+ "elements": [
+  {
+   "id": "wall-left",
+   "group": "structure",
+   "type": "line",
+   "kind": "edge",
+   "p0": [
+    354.0,
+    312.0
+   ],
+   "p1": [
+    352.0,
+    540.0
+   ],
+   "score": 20.93
+  },
+  {
+   "id": "ceiling",
+   "group": "structure",
+   "type": "line",
+   "kind": "edge",
+   "p0": [
+    353.66,
+    313.89
+   ],
+   "p1": [
+    992.67,
+    86.06
+   ],
+   "score": 32.09
+  },
+  {
+   "id": "floor-left",
+   "group": "structure",
+   "type": "line",
+   "kind": "edge",
+   "p0": [
+    0.0,
+    669.0
+   ],
+   "p1": [
+    199.05,
+    666.0
+   ],
+   "score": 4.8
+  },
+  {
+   "id": "skirting-r",
+   "group": "structure",
+   "type": "line",
+   "kind": "edge",
+   "p0": [
+    722.0,
+    794.0
+   ],
+   "p1": [
+    990.64,
+    895.76
+   ],
+   "score": 27.43
+  },
+  {
+   "id": "floor-right",
+   "group": "structure",
+   "type": "line",
+   "kind": "edge",
+   "p0": [
+    721.81,
+    817.46
+   ],
+   "p1": [
+    990.89,
+    927.79
+   ],
+   "score": 18.03
+  },
+  {
+   "id": "joint-h1",
+   "group": "panels",
+   "type": "line",
+   "kind": "joint",
+   "p0": [
+    356.08,
+    401.49
+   ],
+   "p1": [
+    989.75,
+    291.52
+   ],
+   "score": 20.59
+  },
+  {
+   "id": "joint-h2",
+   "group": "panels",
+   "type": "line",
+   "kind": "joint",
+   "p0": [
+    356.0,
+    487.0
+   ],
+   "p1": [
+    989.98,
+    494.5
+   ],
+   "score": 30.32
+  },
+  {
+   "id": "joint-h3",
+   "group": "panels",
+   "type": "line",
+   "kind": "joint",
+   "p0": [
+    728.47,
+    643.54
+   ],
+   "p1": [
+    990.0,
+    696.0
+   ],
+   "score": 18.57
+  },
+  {
+   "id": "joint-v1",
+   "group": "panels",
+   "type": "line",
+   "kind": "joint",
+   "p0": [
+    429.3,
+    292.0
+   ],
+   "p1": [
+    425.0,
+    547.99
+   ],
+   "score": 9.84
+  },
+  {
+   "id": "joint-v2",
+   "group": "panels",
+   "type": "line",
+   "kind": "joint",
+   "p0": [
+    535.7,
+    255.02
+   ],
+   "p1": [
+    526.0,
+    554.96
+   ],
+   "score": 17.63
+  },
+  {
+   "id": "joint-v3",
+   "group": "panels",
+   "type": "line",
+   "kind": "joint",
+   "p0": [
+    696.2,
+    196.07
+   ],
+   "p1": [
+    678.0,
+    556.96
+   ],
+   "score": 21.31
+  },
+  {
+   "id": "joint-v4",
+   "group": "panels",
+   "type": "line",
+   "kind": "joint",
+   "p0": [
+    955.8,
+    104.15
+   ],
+   "p1": [
+    910.5,
+    862.09
+   ],
+   "score": 34.98
+  },
+  {
+   "id": "desk-top",
+   "group": "desk",
+   "type": "polyline",
+   "points": [
+    [
+     200.53,
+     531.98
+    ],
+    [
+     288.9,
+     541.75
+    ],
+    [
+     383.86,
+     548.96
+    ],
+    [
+     482.08,
+     554.37
+    ],
+    [
+     569.59,
+     560.5
+    ],
+    [
+     647.66,
+     563.27
+    ],
+    [
+     725.8,
+     563.3
+    ]
+   ]
+  },
+  {
+   "id": "desk-left",
+   "group": "desk",
+   "type": "line",
+   "kind": "edge",
+   "p0": [
+    200.5,
+    528.0
+   ],
+   "p1": [
+    198.0,
+    750.0
+   ],
+   "score": 7.85
+  },
+  {
+   "id": "desk-right",
+   "group": "desk",
+   "type": "line",
+   "kind": "edge",
+   "p0": [
+    725.8,
+    563.0
+   ],
+   "p1": [
+    714.0,
+    895.91
+   ],
+   "score": 57.01
+  },
+  {
+   "id": "desk-bottom",
+   "group": "desk",
+   "type": "polyline",
+   "points": [
+    [
+     715.27,
+     893.31
+    ],
+    [
+     649.08,
+     914.74
+    ],
+    [
+     571.49,
+     925.71
+    ],
+    [
+     494.12,
+     927.24
+    ],
+    [
+     434.78,
+     919.24
+    ],
+    [
+     394.11,
+     899.78
+    ],
+    [
+     349.38,
+     864.08
+    ],
+    [
+     283.44,
+     811.63
+    ],
+    [
+     207.39,
+     752.39
+    ]
+   ]
+  },
+  {
+   "id": "desk-seam",
+   "group": "desk",
+   "type": "line",
+   "kind": "joint",
+   "p0": [
+    201.43,
+    636.6
+   ],
+   "p1": [
+    383.14,
+    726.8
+   ],
+   "score": 3.55
+  },
+  {
+   "id": "plinth-end",
+   "group": "desk",
+   "type": "line",
+   "kind": "edge",
+   "p0": [
+    690.8,
+    910.0
+   ],
+   "p1": [
+    687.3,
+    979.0
+   ],
+   "score": 19.59
+  },
+  {
+   "id": "ring-a",
+   "group": "rings",
+   "type": "ellipse",
+   "cx": 419.96,
+   "cy": 49.92,
+   "rx": 139.51,
+   "ry": 48.01,
+   "rot": -1.48
+  },
+  {
+   "id": "ring-b",
+   "group": "rings",
+   "type": "ellipse",
+   "cx": 340.61,
+   "cy": 110.6,
+   "rx": 186.95,
+   "ry": 57.15,
+   "rot": -0.55
+  },
+  {
+   "id": "ring-c",
+   "group": "rings",
+   "type": "ellipse",
+   "cx": 279.37,
+   "cy": 189.64,
+   "rx": 79.65,
+   "ry": 21.85,
+   "rot": 3.41
+  }
+ ]
+}

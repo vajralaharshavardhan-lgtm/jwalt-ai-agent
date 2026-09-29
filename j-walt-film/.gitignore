@@ -1,0 +1,4 @@
+node_modules/
+analysis/pages/
+render/frames/
+output/*.mp4

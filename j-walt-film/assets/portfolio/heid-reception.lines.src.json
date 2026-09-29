@@ -1,0 +1,30 @@
+{
+ "asset": "heid-reception",
+ "note": "Construction lines of the real Heidelberg reception (source pack p05), authored by eye in image pixels (993x983) and registered by analysis/snap_lines.py. Groups draw in order: structure -> panels -> desk -> rings. Nothing here is a design drawing of the project; it is a tracing of the photograph, used as a motion device.",
+ "elements": [
+  {"id": "wall-left",   "group": "structure", "type": "line", "kind": "edge",  "p0": [353, 312], "p1": [353, 540]},
+  {"id": "ceiling",     "group": "structure", "type": "line", "kind": "edge",  "p0": [353, 312], "p1": [993, 87]},
+  {"id": "floor-left",  "group": "structure", "type": "line", "kind": "edge",  "p0": [0, 669],   "p1": [199, 671]},
+  {"id": "skirting-r",  "group": "structure", "type": "line", "kind": "edge",  "p0": [722, 794], "p1": [992, 892]},
+  {"id": "floor-right", "group": "structure", "type": "line", "kind": "edge",  "p0": [722, 817], "p1": [992, 925]},
+
+  {"id": "joint-h1", "group": "panels", "type": "line", "kind": "joint", "p0": [356, 401], "p1": [990, 293]},
+  {"id": "joint-h2", "group": "panels", "type": "line", "kind": "joint", "p0": [356, 487], "p1": [990, 492]},
+  {"id": "joint-h3", "group": "panels", "type": "line", "kind": "joint", "p0": [728, 646], "p1": [990, 696]},
+  {"id": "joint-v1", "group": "panels", "type": "line", "kind": "joint", "p0": [429.3, 292], "p1": [425.5, 548]},
+  {"id": "joint-v2", "group": "panels", "type": "line", "kind": "joint", "p0": [534.7, 255], "p1": [528, 555]},
+  {"id": "joint-v3", "group": "panels", "type": "line", "kind": "joint", "p0": [694.7, 196], "p1": [679, 557]},
+  {"id": "joint-v4", "group": "panels", "type": "line", "kind": "joint", "p0": [953.3, 104], "p1": [909, 862]},
+
+  {"id": "desk-top",    "group": "desk", "type": "polyline", "points": [[201, 527.5], [288.3, 536.7], [380, 546.7], [488.3, 555.8], [571.7, 559.2], [646.7, 560.8], [725.8, 563.3]]},
+  {"id": "desk-left",   "group": "desk", "type": "line", "kind": "edge",  "p0": [201, 528], "p1": [201, 750]},
+  {"id": "desk-right",  "group": "desk", "type": "line", "kind": "edge",  "p0": [725.8, 563], "p1": [717.5, 896]},
+  {"id": "desk-bottom", "group": "desk", "type": "polyline", "points": [[717, 898], [655, 920.8], [571.7, 930], [488.3, 930], [430, 916.7], [396.7, 900], [363.3, 866.7], [286, 808], [209.2, 750]]},
+  {"id": "desk-seam",   "group": "desk", "type": "line", "kind": "joint", "p0": [201, 637.5], "p1": [384, 725]},
+  {"id": "plinth-end",  "group": "desk", "type": "line", "kind": "edge",  "p0": [688.3, 910], "p1": [688.3, 979]},
+
+  {"id": "ring-a", "group": "rings", "type": "ellipse", "cx": 419.96, "cy": 49.92, "rx": 139.51, "ry": 48.01, "rot": -1.48},
+  {"id": "ring-b", "group": "rings", "type": "ellipse", "cx": 340.61, "cy": 110.6, "rx": 186.95, "ry": 57.15, "rot": -0.55},
+  {"id": "ring-c", "group": "rings", "type": "ellipse", "cx": 279.37, "cy": 189.64, "rx": 79.65, "ry": 21.85, "rot": 3.41}
+ ]
+}
