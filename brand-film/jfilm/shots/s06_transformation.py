@@ -71,7 +71,23 @@ def _objects():
             cat = "furniture" if g == "furniture" or layer == "furniture" else layer
             T = float(time_at(W[:, 1].min() if layer in ("ceiling", "joinery") else yc)) + LAG.get(cat, 0.15)
             fin.append((ob.name, T, cat, M))
+    # a piece of furniture lands as one unit (sofa plinth, body and cushions
+    # together), at the time of its nearest part
+    first: dict[str, float] = {}
+    for name, T, cat, _ in fin:
+        if cat == "furniture":
+            first[_piece(name)] = min(T, first.get(_piece(name), T))
+    fin = [(n, first[_piece(n)] if c == "furniture" else T, c, M) for n, T, c, M in fin]
     return fin, site
+
+
+def _piece(name: str) -> str:
+    """Arrival group. The lounge set (rug, sofa, tables) lands together: the
+    rug under the sofa is never seen by any still, so it cannot be shown
+    before the sofa sits on it."""
+    parts = name.split("_")
+    head = parts[1] if parts[0] == "bowl" and len(parts) > 1 else parts[0]
+    return "sofa" if head in ("rug", "sofa", "table", "side") else head
 
 
 def _motion(cat, u, M, name):
@@ -118,8 +134,9 @@ class Shot(_Shot):
         yf = front_y(t)
         wB = float(E.smoothstep(E.lin(T0 + 1.0, T1 - 0.8, t)))
         wA = 1 - wB
-        # furniture lands mid-sequence: its shadows arrive with it
-        wf = float(E.smoothstep(E.lin(time_at(4.6) + LAG["furniture"], time_at(6.6) + LAG["furniture"] + DUR, t)))
+        # furniture shadows arrive with the sofa (the piece that casts them)
+        t_sofa = min(T for n, T, c, _ in fin if _piece(n) == "sofa")
+        wf = float(E.smoothstep(E.lin(t_sofa + 0.1, t_sofa + DUR + 0.15, t)))
 
         def f(P):
             return smooth_front(P[:, 1], yf, 0.9)
