@@ -1,0 +1,66 @@
+# J-WALT brand film -- the single place to change timing, copy, colour,
+# typography and output formats. Every shot, graphic and sound cue reads
+# from here, so a re-time here re-times picture AND sound together.
+
+title: "J-WALT -- From Vision to Reality"
+fps: 24
+duration: 35.0          # seconds
+
+# Output formats. `fov_scale` is the vertical field of view relative to the
+# 16:9 master: the vertical cut sees more floor-to-ceiling, less width.
+formats:
+  16x9: { width: 1920, height: 1080, fov_scale: 1.00, label: "YouTube / website / LinkedIn" }
+  9x16: { width: 1080, height: 1920, fov_scale: 1.45, label: "Reels / Shorts" }
+  1x1:  { width: 1080, height: 1080, fov_scale: 1.18, label: "Social feed" }
+
+# Brand copy. Only verified facts go here (see README "Sources").
+# The logo slot uses assets/brand/logo.svg or logo.png when present;
+# without it a clearly-labelled typeset placeholder is rendered.
+brand:
+  name: "J-WALT"
+  website: "j-walt.com"
+  services: ["INTERIOR DESIGN", "FIT-OUT", "MEP", "JOINERY"]
+  logo_svg: assets/brand/logo.svg
+  logo_png: assets/brand/logo.png
+
+# Palette (sRGB hex). Placeholder architectural palette until the website's
+# brand colours can be read -- swap the values, nothing else changes.
+palette:
+  black:      "#0A0A0B"
+  ink:        "#121212"
+  warm_white: "#EEE8DD"
+  line:       "#E8E0D2"
+  line_dim:   "#8C857A"
+  accent:     "#C9A677"    # champagne / brushed brass
+  stone:      "#B8AD9B"
+
+typography:
+  display:  { font: "assets/fonts/Jost[wght].ttf",    weight: 300, tracking: 0.42 }
+  label:    { font: "assets/fonts/Manrope[wght].ttf", weight: 500, tracking: 0.32 }
+  wordmark: { font: "assets/fonts/Manrope[wght].ttf", weight: 600, tracking: 0.26 }
+
+# Shot list (seconds). Order = edit order. Each id maps to jfilm/shots/<id>.py
+shots:
+  - { id: s01_vision,         start: 0.0,  end: 3.6,  title: "VISION" }
+  - { id: s02_design,         start: 3.6,  end: 8.0,  title: "DESIGN" }
+  - { id: s03_craft,          start: 8.0,  end: 12.0, title: "CRAFT" }
+  - { id: s04_engineering,    start: 12.0, end: 16.0, title: "ENGINEERING" }
+  - { id: s05_execution,      start: 16.0, end: 21.5, title: "EXECUTION" }
+  - { id: s06_transformation, start: 21.5, end: 27.5, title: "" }
+  - { id: s07_hero,           start: 27.5, end: 32.0, title: "" }
+  - { id: s08_brand,          start: 32.0, end: 35.0, title: "" }
+
+render:
+  # Projector stills (Cycles). Preview values are used with --preview.
+  still_samples: 48
+  still_samples_preview: 12
+  still_scale_preview: 0.5
+  gbuffer_supersample: 2      # per-frame visibility buffer oversampling (AA)
+  grain: 0.022
+  halation: 0.18
+  vignette: 0.22
+
+audio:
+  sample_rate: 48000
+  target_lufs: -14.0
+  true_peak_db: -1.0

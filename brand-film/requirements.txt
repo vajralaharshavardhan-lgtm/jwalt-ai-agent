@@ -1,0 +1,11 @@
+# J-WALT brand film pipeline (Python 3.11)
+bpy==4.5.*            # Blender as a Python module (Cycles + Workbench)
+numpy
+scipy
+numba
+opencv-python-headless
+skia-python
+OpenEXR>=3.3
+opencolorio
+soundfile
+PyYAML
