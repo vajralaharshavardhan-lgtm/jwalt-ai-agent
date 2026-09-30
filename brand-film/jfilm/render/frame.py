@@ -53,7 +53,7 @@ class FrameRenderer:
             if not path.exists():
                 raise FileNotFoundError(f"still {path.name} not rendered (run: render.py stills)")
             s = PJ.Still(path)
-            if len(self._stills) > 10:
+            if len(self._stills) > 7:
                 self._stills.pop(next(iter(self._stills)))
             self._stills[name] = s
         return s

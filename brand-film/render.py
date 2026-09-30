@@ -107,8 +107,17 @@ def cmd_frames(args):
         for p in procs:
             p.start()
         done = 0
+        import queue
         while done < len(idx):
-            msg = q.get()
+            try:
+                msg = q.get(timeout=60)
+            except queue.Empty:
+                dead = [p for p in procs if not p.is_alive() and p.exitcode]
+                if dead:
+                    for p in procs:
+                        p.terminate()
+                    raise SystemExit(f"a frame worker died (exit {dead[0].exitcode}; out of memory?)")
+                continue
             if isinstance(msg, tuple):
                 for p in procs:
                     p.terminate()

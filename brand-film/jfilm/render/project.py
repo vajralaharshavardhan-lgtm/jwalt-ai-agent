@@ -16,6 +16,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+from numba import njit, prange
 
 from ..camera import CamState, View
 from . import exr
@@ -57,8 +58,13 @@ class Still:
             view = view_from_json(json.loads(path.with_suffix(".json").read_text()))
         self.path = path
         self.view = view
-        self.groups = {k[3:]: np.ascontiguousarray(v[..., :3]) for k, v in L.items() if k.startswith("lg_")}
-        self.combined = L.get("combined")
+        # light groups kept at half precision; groups that contribute nothing
+        # to this view (e.g. meeting-room light from a macro angle) are dropped
+        self.groups = {}
+        for k, v in L.items():
+            if k.startswith("lg_") and float(v[..., :3].max()) > 1e-6:
+                self.groups[k[3:]] = np.ascontiguousarray(v[..., :3], dtype=np.float16)
+        self.combined = None
         self.depth = np.ascontiguousarray(L["depth"].astype(np.float32))
         nrm = L.get("normal")
         self.normal = None if nrm is None else np.ascontiguousarray(nrm[..., :3].astype(np.float32))
@@ -75,7 +81,7 @@ class Still:
         out = np.zeros((self.H, self.W, 3), np.float32)
         for g, w in weights.items():
             if w and g in self.groups:
-                out += self.groups[g] * np.float32(w)
+                out += self.groups[g].astype(np.float32) * np.float32(w)
         self._mix_cache = (key, out)
         return out
 
@@ -122,40 +128,137 @@ def remap_points(img: np.ndarray, mx: np.ndarray, my: np.ndarray, interp=cv2.INT
     return out.reshape(rows * cols, ch)[:n] if ch > 1 else out.reshape(-1)[:n]
 
 
+@njit(parallel=True, fastmath=True, cache=True)
+def _sample_kernel(P, N, tid, R, t, fx, fy, cx, cy, ids, depth, nrm, img, tol_abs, tol_rel, wildcard, use_n,
+                   out_c, out_w):
+    H, W = ids.shape
+    for i in prange(P.shape[0]):
+        d0 = P[i, 0] - t[0]
+        d1 = P[i, 1] - t[1]
+        d2 = P[i, 2] - t[2]
+        xc = d0 * R[0, 0] + d1 * R[1, 0] + d2 * R[2, 0]
+        yc = d0 * R[0, 1] + d1 * R[1, 1] + d2 * R[2, 1]
+        z = -(d0 * R[0, 2] + d1 * R[1, 2] + d2 * R[2, 2])
+        out_w[i] = 0.0
+        if z <= 0.02:
+            continue
+        mx = cx + fx * xc / z - 0.5
+        my = cy - fy * yc / z - 0.5
+        if mx <= -0.5 or mx >= W - 0.5 or my <= -0.5 or my >= H - 0.5:
+            continue
+        x0 = int(np.floor(mx))
+        y0 = int(np.floor(my))
+        ax = mx - x0
+        ay = my - y0
+        tol = tol_abs + tol_rel * z
+        c0 = 0.0
+        c1 = 0.0
+        c2 = 0.0
+        ws = 0.0
+        for k in range(4):
+            dx = k & 1
+            dy = k >> 1
+            xi = min(max(x0 + dx, 0), W - 1)
+            yi = min(max(y0 + dy, 0), H - 1)
+            wb = (ax if dx else 1.0 - ax) * (ay if dy else 1.0 - ay)
+            sid = ids[yi, xi]
+            dd = depth[yi, xi]
+            ok = sid == tid[i] and abs(dd - z) < tol
+            if ok and use_n:
+                ok = nrm[yi, xi, 0] * N[i, 0] + nrm[yi, xi, 1] * N[i, 1] + nrm[yi, xi, 2] * N[i, 2] > 0.55
+            if not ok and wildcard and sid == 0 and dd < z + tol:
+                ok = True
+            if ok:
+                c0 += wb * img[yi, xi, 0]
+                c1 += wb * img[yi, xi, 1]
+                c2 += wb * img[yi, xi, 2]
+                ws += wb
+        if ws > 1e-4:
+            out_c[i, 0] = c0 / ws
+            out_c[i, 1] = c1 / ws
+            out_c[i, 2] = c2 / ws
+            out_w[i] = min(ws * 4.0, 1.0)
+
+
 def sample_still(still: Still, img: np.ndarray, P: np.ndarray, target_ids: np.ndarray,
                  N: np.ndarray | None = None, tol_abs: float = 0.015, tol_rel: float = 0.006,
                  wildcard: bool = False):
     """Look up world points P (N,3) whose visible object id is target_ids (N,)
-    in `still`. Returns colour (N,3) and weight (N,) in [0,1] (0 = unseen)."""
-    x, y, z = still.view.project(P)
-    mx = (x - 0.5).astype(np.float32)
-    my = (y - 0.5).astype(np.float32)
-    W, H = still.W, still.H
-    inside = (z > 0.02) & (mx > -0.5) & (mx < W - 0.5) & (my > -0.5) & (my < H - 0.5)
-    x0 = np.floor(mx).astype(np.int32)
-    y0 = np.floor(my).astype(np.int32)
-    fx = (mx - x0).astype(np.float32)
-    fy = (my - y0).astype(np.float32)
-    col = np.zeros((len(P), 3), np.float32)
-    wsum = np.zeros(len(P), np.float32)
-    tol = (tol_abs + tol_rel * z).astype(np.float32)
-    zf = z.astype(np.float32)
-    for dx, dy, wb in ((0, 0, (1 - fx) * (1 - fy)), (1, 0, fx * (1 - fy)), (0, 1, (1 - fx) * fy), (1, 1, fx * fy)):
-        xi = np.clip(x0 + dx, 0, W - 1)
-        yi = np.clip(y0 + dy, 0, H - 1)
-        sid = still.ids[yi, xi]
-        ok = inside & (sid == target_ids) & (np.abs(still.depth[yi, xi] - zf) < tol)
-        if N is not None and still.normal is not None:
-            ok &= np.einsum("ij,ij->i", still.normal[yi, xi], N) > 0.55
-        if wildcard:
-            ok |= inside & (sid == 0) & (still.depth[yi, xi] < zf + tol)
-        w = np.where(ok, wb, 0).astype(np.float32)
-        if w.any():
-            col += img[yi, xi] * w[:, None]
-            wsum += w
-    good = wsum > 1e-4
-    col[good] /= wsum[good, None]
-    return col, np.clip(wsum * 4, 0, 1) * good   # soften weight near silhouettes
+    in `still` (id + depth + normal agreement, bilinear over agreeing texels).
+    Returns colour (N,3) and weight (N,) in [0,1] (0 = unseen)."""
+    v = still.view
+    n = len(P)
+    out_c = np.zeros((n, 3), np.float32)
+    out_w = np.zeros(n, np.float32)
+    use_n = N is not None and still.normal is not None
+    Nn = np.ascontiguousarray(N, np.float32) if use_n else np.zeros((1, 3), np.float32)
+    nrm = still.normal if use_n else np.zeros((1, 1, 3), np.float32)
+    _sample_kernel(np.ascontiguousarray(P, np.float32), Nn, np.ascontiguousarray(target_ids, np.int32),
+                   v.R.astype(np.float64), v.t.astype(np.float64), float(v.fx), float(v.fy), float(v.cx), float(v.cy),
+                   still.ids, still.depth, nrm, np.ascontiguousarray(img, np.float32), float(tol_abs), float(tol_rel),
+                   bool(wildcard), bool(use_n), out_c, out_w)
+    return out_c, out_w
+
+
+@njit(parallel=True, fastmath=True, cache=True)
+def _positions_normals(depth, ids, R, t, fx, fy, cx, cy, P, N):
+    """World positions and same-object finite-difference normals (toward camera)."""
+    H, W = depth.shape
+    for y in prange(H):
+        for x in range(W):
+            d = depth[y, x]
+            if d > 1e5:
+                d = 0.0
+            xc = (x + 0.5 - cx) / fx * d
+            yc = -(y + 0.5 - cy) / fy * d
+            zc = -d
+            for k in range(3):
+                P[y, x, k] = R[k, 0] * xc + R[k, 1] * yc + R[k, 2] * zc + t[k]
+    for y in prange(H):
+        for x in range(W):
+            me = ids[y, x]
+            # horizontal tangent
+            hx = 0.0
+            hy = 0.0
+            hz = 0.0
+            if x + 1 < W and ids[y, x + 1] == me:
+                hx = P[y, x + 1, 0] - P[y, x, 0]
+                hy = P[y, x + 1, 1] - P[y, x, 1]
+                hz = P[y, x + 1, 2] - P[y, x, 2]
+            elif x > 0 and ids[y, x - 1] == me:
+                hx = P[y, x, 0] - P[y, x - 1, 0]
+                hy = P[y, x, 1] - P[y, x - 1, 1]
+                hz = P[y, x, 2] - P[y, x - 1, 2]
+            vx = 0.0
+            vy = 0.0
+            vz = 0.0
+            if y + 1 < H and ids[y + 1, x] == me:
+                vx = P[y + 1, x, 0] - P[y, x, 0]
+                vy = P[y + 1, x, 1] - P[y, x, 1]
+                vz = P[y + 1, x, 2] - P[y, x, 2]
+            elif y > 0 and ids[y - 1, x] == me:
+                vx = P[y, x, 0] - P[y - 1, x, 0]
+                vy = P[y, x, 1] - P[y - 1, x, 1]
+                vz = P[y, x, 2] - P[y - 1, x, 2]
+            nx = vy * hz - vz * hy
+            ny = vz * hx - vx * hz
+            nz = vx * hy - vy * hx
+            ln = (nx * nx + ny * ny + nz * nz) ** 0.5
+            if ln < 1e-12:
+                N[y, x, 0] = 0.0
+                N[y, x, 1] = 0.0
+                N[y, x, 2] = 0.0
+                continue
+            nx /= ln
+            ny /= ln
+            nz /= ln
+            if nx * (t[0] - P[y, x, 0]) + ny * (t[1] - P[y, x, 1]) + nz * (t[2] - P[y, x, 2]) < 0:
+                nx = -nx
+                ny = -ny
+                nz = -nz
+            N[y, x, 0] = nx
+            N[y, x, 1] = ny
+            N[y, x, 2] = nz
 
 
 def normals_from_positions(P: np.ndarray, ids: np.ndarray, view: View) -> np.ndarray:
@@ -170,7 +273,7 @@ def normals_from_positions(P: np.ndarray, ids: np.ndarray, view: View) -> np.nda
         nb = np.linalg.norm(bwd, axis=-1)
         use_f = same_f & (~same_b | (nf <= nb))
         return np.where(use_f[..., None], fwd, bwd)
-    n = np.cross(diff(1), diff(0))
+    n = np.cross(diff(1), diff(0)).astype(np.float32)
     ln = np.linalg.norm(n, axis=-1, keepdims=True)
     n = n / np.maximum(ln, 1e-12)
     to_cam = view.t - P
@@ -209,8 +312,11 @@ def shade(view: View, ids: np.ndarray, depth: np.ndarray, layers: list[Layer], e
 
     idx = np.nonzero(geo_mask.ravel())[0]
     if len(idx):
-        Pfull = view.unproject(xs, ys, np.where(fg, depth, 0).astype(np.float64))
-        Nfull = normals_from_positions(Pfull, ids, view)
+        Pfull = np.empty((H, W, 3), np.float32)
+        Nfull = np.empty((H, W, 3), np.float32)
+        _positions_normals(np.ascontiguousarray(depth, np.float32), np.ascontiguousarray(ids, np.int32),
+                           view.R.astype(np.float64), view.t.astype(np.float64), float(view.fx), float(view.fy),
+                           float(view.cx), float(view.cy), Pfull, Nfull)
         P = Pfull.reshape(-1, 3)[idx]
         N = Nfull.reshape(-1, 3)[idx]
         del Pfull, Nfull
