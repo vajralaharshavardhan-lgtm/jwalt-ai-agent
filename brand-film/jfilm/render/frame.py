@@ -152,6 +152,9 @@ class FrameRenderer:
 
     # --- frame --------------------------------------------------------------------------
     def render(self, t: float, frame_index: int = 0) -> np.ndarray:
+        # shots read the Blender scene (object lists, default poses) inside
+        # plate(); build it first so a worker that starts mid-film sees it
+        self._ensure_scene()
         shot = base.at(t)
         cam = shot.cam(t)
         view = view_for(cam, self.fmt, shot.reframe, self.scale, t)
