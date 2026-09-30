@@ -330,6 +330,7 @@ def shade(view: View, ids: np.ndarray, depth: np.ndarray, layers: list[Layer], e
                 mv = None
         acc = np.zeros((len(idx), 3), np.float32)
         wacc = np.zeros(len(idx), np.float32)
+        cacc = np.zeros(len(idx), np.float32)
         for L in layers:
             Pl, Nl = P, N
             if mv is not None:
@@ -348,17 +349,22 @@ def shade(view: View, ids: np.ndarray, depth: np.ndarray, layers: list[Layer], e
             img = L.image if L.image is not None else L.still.mix(L.lights)
             c, w = sample_still(L.still, img, Pl, tid, Nl, wildcard=L.wildcard)
             if callable(L.weight):
-                w = w * np.asarray(L.weight(P), np.float32)
+                lw = np.asarray(L.weight(P), np.float32)
             elif isinstance(L.weight, np.ndarray):
-                w = w * L.weight.ravel()[idx]
+                lw = L.weight.ravel()[idx].astype(np.float32)
             else:
-                w = w * np.float32(L.weight)
+                lw = np.float32(L.weight)
+            # coverage = did any contributing still actually see this point;
+            # the blend weight only decides the mix (a 1e-4 fallback layer is
+            # still a real observation, not a hole)
+            cacc = np.maximum(cacc, w * (lw > 0))
+            w = w * lw
             acc += c * w[:, None]
             wacc += w
-        good = wacc > 1e-5
+        good = wacc > 1e-12
         acc[good] /= wacc[good, None]
         rgb.reshape(-1, 3)[idx] = acc
-        cover.ravel()[idx] = np.clip(wacc, 0, 1)
+        cover.ravel()[idx] = cacc
 
     if env is not None:
         sky = ~fg | env_mask
