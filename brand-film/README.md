@@ -140,6 +140,11 @@ python render.py frames -f all --workers 3     # 16x9, 9x16, 1x1
 python render.py encode -f all                 # ProRes master + H.264 deliverables
 ```
 
+Memory: each frame worker needs about 4 GB and a final still about 5 GB
+while compositing. On a 16 GB machine, run stills alone or beside at most
+two frame workers. Finished frames are skipped on re-runs, so an
+interrupted render resumes where it stopped.
+
 Stills are cached by a hash of their spec. Changing one shot re-renders
 only that shot's stills. Bump `SCENE_VERSION` in `jfilm/render/stills.py`
 after editing geometry, materials or lights.
