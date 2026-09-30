@@ -98,7 +98,7 @@ class Shot(_Shot):
         fin = LayerSpec("s05a_fin", lights(daylight=1.0, down=down, cove=1.0))
         brd = LayerSpec("s05a_board", lights(daylight=1.0))
         return Plate({"always", "shell", "finish", "furniture", "exterior", "boards"}, [fin, brd], hide=hide,
-                     poses=poses, fades=fades, exposure=0.2)
+                     hide_prefix=("cboard_",), poses=poses, fades=fades, exposure=0.2)
 
     def _b(self, t):
         if t < B_FIN:
@@ -111,10 +111,8 @@ class Shot(_Shot):
         """Screed -> stone. Walls and ceiling are already finished (as on a
         real site, floors go down late); site boxes leave as the wave passes."""
         poses, fades, hide = {}, {}, set()
-        last = C_WAVE
         for name, x, y in TILES:
             T = C_WAVE + np.hypot(x - C_ORIGIN[0], y - C_ORIGIN[1]) / C_SPEED
-            last = max(last, T) if np.hypot(x - C_ORIGIN[0], y - C_ORIGIN[1]) < 9 else last
             u = E.lin(T, T + C_TILE, t)
             if u <= 0:
                 hide.add(name)
@@ -147,10 +145,10 @@ class Shot(_Shot):
             inside = (s > 0) & (s < 1) & (hit[:, 1] > 4.815 + dy) & (hit[:, 1] < 5.985 + dy) & (hit[:, 2] > 0.025) & (hit[:, 2] < 3.74)
             return inside.astype(np.float32)
 
-        m = float(E.smoothstep(E.lin(D_LIGHT, D_LIGHT + 0.3, t)))
+        m = 0.25 + 0.75 * float(E.smoothstep(E.lin(D_LIGHT, D_LIGHT + 0.3, t)))
         L = lights(daylight=1.0, cove=1.0, down=1.0, niche=1.0, meeting=m)
         return Plate("finished", [LayerSpec("s05d_A", L, lambda P: 1 - covered(P) + 1e-4, wildcard=True),
-                                  LayerSpec("s05d_B", L, lambda P: covered(P) + 1e-4, wildcard=True)], exposure=0.1)
+                                  LayerSpec("s05d_B", L, lambda P: covered(P) + 1e-4, wildcard=True)], exposure=0.6)
 
     def draw(self, t, g):
         titles.chapter(g, "EXECUTION", t, 16.3, 18.1)

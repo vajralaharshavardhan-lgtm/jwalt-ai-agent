@@ -24,18 +24,26 @@ JOIN = (14.95, 15.85)      # layers settle back
 DRAW_ON = (12.0, 12.55)
 
 # (key, label, z offset when exploded)
-LAYERS = [("floor", "FLOOR FINISHES", 0.0), ("walls", "WALLS · PARTITIONS · JOINERY", 1.7),
-          ("ceiling", "CEILINGS · LIGHTING", 4.5), ("mep", "MEP SERVICES", 6.2)]
+LAYERS = [("floor", "FLOOR FINISHES", 0.0), ("walls", "WALLS · PARTITIONS · JOINERY", 1.5),
+          ("ceiling", "CEILINGS · LIGHTING", 4.1), ("mep", "MEP SERVICES", 5.6)]
 
 
-def _orbit(az, el, dist, vfov):
+def _orbit(az, el, dist, vfov, shift=3.4, lift=-0.4):
+    """Camera on an orbit around the model; the aim point is pushed to the
+    camera's right so the model sits left of centre, leaving the right third
+    for the layer labels."""
     a, e = np.radians(az), np.radians(el)
     pos = CENTER + dist * np.array([np.sin(a) * np.cos(e), -np.cos(a) * np.cos(e), np.sin(e)])
-    return CamState.look(tuple(pos), tuple(CENTER + np.array([0, 0, 1.2])), vfov)
+    fwd = (CENTER - pos) / np.linalg.norm(CENTER - pos)
+    right = np.cross(fwd, [0, 0, 1.0])
+    right /= np.linalg.norm(right)
+    aim = CENTER + right * shift + np.array([0, 0, 2.4 + lift])
+    return CamState.look(tuple(pos), tuple(aim), vfov)
 
 
-PATH = CamPath([(T0, _orbit(38.0, 24.0, 33.0, 36.0)), (T1, _orbit(24.0, 30.0, 31.0, 35.0))],
+PATH = CamPath([(T0, _orbit(-34.0, 27.0, 30.5, 38.0, lift=-1.9)), (T1, _orbit(-20.0, 31.0, 29.0, 37.0, lift=-1.9))],
                ease=E.cubic_bezier(0.3, 0.0, 0.3, 1.0))
+REFRAME = {"9x16": {"yaw": 9.0, "fov_scale": 1.55}, "1x1": {"yaw": 4.0}}
 
 
 @lru_cache(maxsize=1)
@@ -71,6 +79,7 @@ def _explode(t):
 
 class Shot(_Shot):
     id = "s04_engineering"
+    reframe = REFRAME
 
     def cam(self, t):
         return PATH(t)
@@ -102,7 +111,7 @@ class Shot(_Shot):
             g.lines3d(s, g.pal["line"], width=0.7, alpha=0.78 * vis, progress=prog, glow=1.0, glow_alpha=0.18,
                       fade_depth=(24.0, 48.0))
             self._label(g, t, i, key, label, z, vis)
-        titles.chapter(g, "ENGINEERING", t, 12.55, 14.75)
+        titles.chapter(g, "ENGINEERING", t, 12.55, 14.75, y_frac=0.9 if g.fmt.key == "16x9" else None)
 
     def _fill(self, g, poly, color, alpha):
         P, D, valid = g.project_segments(np.stack([poly, np.roll(poly, -1, 0)], 1))
@@ -122,25 +131,29 @@ class Shot(_Shot):
         a = float(E.smoothstep(E.lin(t_in, t_in + 0.4, t))) * (1 - float(E.smoothstep(E.lin(t_out, t_out + 0.35, t)))) * vis
         if a <= 0.01:
             return
-        zref = {"floor": 0.0, "walls": 1.2, "ceiling": Z_CEIL, "mep": 4.3}[key]
-        anchor = np.array([XP, 0.0, zref + z])
+        zref = {"floor": 0.0, "walls": 1.4, "ceiling": Z_CEIL, "mep": 4.3}[key]
+        # anchor on the model's right-hand (east) edge, mid-depth
+        anchor = np.array([XP, 4.5, zref + z])
         x, y, d = g.view.project(anchor)
         if d <= 0:
             return
         u = g.u
-        right = g.fmt.key != "9x16"
-        x_end = g.W - 150 * u if right else g.W - 40 * u
-        grow = float(E.out_expo(E.lin(t_in, t_in + 0.5, t)))
-        xe = x + (x_end - x) * grow
         col = g.pal["accent"]
+        vertical = g.fmt.key == "9x16"
+        x_text = g.W * (0.70 if g.fmt.key == "16x9" else 0.66) if not vertical else g.W - 64 * u
+        grow = float(E.out_expo(E.lin(t_in, t_in + 0.5, t)))
+        xe = x + (x_text - 14 * u - x) * grow
         g.line2d((x, y), (xe, y), col, alpha=0.75 * a, width=0.7)
         g.c.drawCircle(float(x), float(y), 2.2 * u, g.paint(col, a, fill=True))
         g.dirty = True
-        tx = xe + 12 * u if right else xe - 12 * u
-        g.text(f"{i + 1:02d}", tx, y - 10 * u, role="label", size=11, color=g.pal["line_dim"], alpha=a,
-               align="left" if right else "right", tracking=0.2)
-        g.text(label, tx, y + 12 * u, role="label", size=13, color=g.pal["warm_white"], alpha=a,
-               align="left" if right else "right", tracking=0.3)
+        if vertical:
+            g.text(f"{i + 1:02d}", x_text, y + 4 * u, role="label", size=12, color=g.pal["warm_white"], alpha=a, align="left",
+                   tracking=0.2)
+            return
+        g.text(f"{i + 1:02d}", x_text, y - 10 * u, role="label", size=11, color=g.pal["line_dim"], alpha=a, align="left",
+               tracking=0.2)
+        g.text(label, x_text, y + 12 * u, role="label", size=13, color=g.pal["warm_white"], alpha=a, align="left",
+               tracking=0.3)
 
     def cues(self):
         c = [Cue(T0, "cut_hit", 0.9), Cue(12.0, "draw_texture", 0.7, {"dur": 0.55}), Cue(SEP[0], "mech_rise", 1.0, {"dur": SEP[1] - SEP[0]}),

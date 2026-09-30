@@ -46,7 +46,7 @@ class Shot(_Shot):
         cy = g.H * (0.47 if g.fmt.key != "9x16" else 0.46)
         # the line
         a_line = float(E.out_expo(E.lin(*LINE, t)))
-        half = 170 * u * a_line
+        half = 210 * u * a_line
         if half > 0.5:
             ry = cy + 30 * u
             g.line2d((cx - half, ry), (cx + half, ry), pal["accent"], alpha=0.95, width=1.0, glow=2.0)
@@ -59,13 +59,13 @@ class Shot(_Shot):
                 def pg(i, n):
                     k = float(E.TYPE(E.lin(MARK[0] + 0.035 * i, MARK[0] + 0.035 * i + 0.62, t)))
                     return k, (1 - k) * 60.0
-                g.text(g.cfg.brand["name"], cx, cy, role="wordmark", size=74, color=pal["warm_white"], per_glyph=pg,
+                g.text(g.cfg.brand["name"], cx, cy, role="wordmark", size=96, color=pal["warm_white"], per_glyph=pg,
                        clip=clip)
         s = float(E.smoothstep(E.lin(*SUB, t)))
         if s > 0.002:
             services = "   ·   ".join(g.cfg.brand["services"])
-            g.text(services, cx, cy + 72 * u, role="label", size=12.5, color=pal["line_dim"], alpha=s, tracking=0.34)
-            g.text(g.cfg.brand["website"], cx, cy + 124 * u + (1 - s) * 6 * u, role="label", size=19,
+            g.text(services, cx, cy + 80 * u, role="label", size=16, color=pal["line_dim"], alpha=s, tracking=0.34)
+            g.text(g.cfg.brand["website"], cx, cy + 138 * u + (1 - s) * 6 * u, role="label", size=24,
                    color=pal["warm_white"], alpha=s, tracking=0.30)
 
     def cues(self):

@@ -29,13 +29,22 @@ def roll_9x16(t: float) -> float:
     return -90.0 * (1 - E.smootherstep(E.lin(2.75, 4.6, t)))
 
 
-REFRAME = {"9x16": {"roll": roll_9x16}}
+def plan_phase(t: float) -> float:
+    """1 while the camera looks straight down at the drawing, easing to 0."""
+    return 1 - float(E.smootherstep(E.lin(2.75, 4.6, t)))
+
+
+REFRAME = {
+    # vertical: plan turned to run up the screen, centred across, pulled back for margins
+    "9x16": {"roll": roll_9x16, "dy": lambda t: 1.5 * plan_phase(t), "dz": lambda t: 7.0 * plan_phase(t)},
+    "1x1": {"dz": lambda t: 6.5 * plan_phase(t)},
+}
 
 # --- timing ---------------------------------------------------------------------
 RISE = (2.72, 4.35)          # walls extrude out of the plan
 PLAN_FADE = (3.7, 4.7)
 DRAW = (3.55, 5.15)          # interior linework draws on, bottom-up
-CLAY = (5.00, 6.40)          # surfaces fill in, floor to ceiling
+CLAY = (4.95, 6.05)          # surfaces fill in, floor to ceiling
 MAT = (6.25, 7.30)           # materials sweep from the back wall toward camera
 LINES_OUT = (6.35, 7.25)
 

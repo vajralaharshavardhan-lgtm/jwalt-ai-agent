@@ -17,19 +17,20 @@ from ._util import lights, projector, smooth_front, translate
 from .base import Cue, LayerSpec, Plate, Shot as _Shot
 
 T0, T1 = 21.5, 27.5
-FRONT = (21.95, 26.1)         # front leaves the camera -> reaches the back wall
-Y_START, Y_END = 0.25, 9.3
+FRONT = (21.6, 25.75)         # front leaves the camera -> reaches the back wall
+Y_START, Y_END = 1.3, 9.3
 
 CAM_S = CamState.look((AXIS_X, 0.55, 1.62), (AXIS_X, 9.0, 1.47), 50.0)
 CAM_E = CamState.look((AXIS_X, 2.60, 1.40), (AXIS_X, 9.0, 1.40), 45.0)
 PATH = CamPath([(T0, CAM_S), (T1, CAM_E)], ease=E.cubic_bezier(0.35, 0.0, 0.25, 1.0))
 
 _u = np.linspace(0, 1, 2001)
-_eased = np.asarray(E.ARCH(_u))
+FRONT_EASE = E.cubic_bezier(0.3, 0.0, 0.35, 1.0)
+_eased = np.asarray(FRONT_EASE(_u))
 
 
 def front_y(t):
-    return Y_START + (Y_END - Y_START) * float(E.ARCH(E.lin(*FRONT, t)))
+    return Y_START + (Y_END - Y_START) * float(FRONT_EASE(E.lin(*FRONT, t)))
 
 
 def time_at(y):
@@ -52,7 +53,7 @@ def _objects():
         if ob.type != "MESH":
             continue
         g = ob.get("jf_group")
-        if g not in ("finish", "furniture", "site", "mep", "framing"):
+        if g not in ("finish", "furniture", "site", "mep", "framing") or ob.get("jf_glass"):
             continue
         V = np.array([v.co[:] for v in ob.data.vertices])
         if len(V) == 0:
@@ -64,8 +65,8 @@ def _objects():
         if g == "site":
             site.append((ob.name, float(time_at(yc)) - 0.12, M, True))
         elif g in ("mep", "framing"):
-            # rough-in leaves once the finish covering it has arrived
-            site.append((ob.name, float(time_at(W[:, 1].min())) + 0.4, M, False))
+            # rough-in leaves once the finish covering its far end has arrived
+            site.append((ob.name, float(time_at(W[:, 1].max())) + 0.4, M, False))
         else:
             cat = "furniture" if g == "furniture" or layer == "furniture" else layer
             T = float(time_at(W[:, 1].min() if layer in ("ceiling", "joinery") else yc)) + LAG.get(cat, 0.15)
@@ -139,7 +140,7 @@ class Shot(_Shot):
             LayerSpec("s06_fin_B", fin_l, lambda P: wB * f(P) * wf + 1e-4),
         ]
         state = {"always", "shell", "mep", "framing", "site", "finish", "furniture", "exterior"}
-        return Plate(state, layers, hide=hide, poses=poses, fades=fades, exposure=0.12)
+        return Plate(state, layers, hide=hide, poses=poses, fades=fades, exposure=0.35)
 
     def post(self, t):
         return {"motion_blur": True}

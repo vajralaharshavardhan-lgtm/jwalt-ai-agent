@@ -17,7 +17,7 @@ import numpy as np
 from .. import config
 from ..camera import CamState, View
 
-SCENE_VERSION = "2026-09-30.7"   # bump when geometry/materials/lights change
+SCENE_VERSION = "2026-09-30.8"   # bump when geometry/materials/lights change
 
 
 @dataclass(frozen=True)

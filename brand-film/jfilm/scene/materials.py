@@ -215,18 +215,24 @@ def _mat_limestone(name, tone=1.0):
 
 
 def _mat_travertine(name, tone=1.0, vertical=False):
-    """Vein-cut travertine: layered bands, open pores, soft honed sheen."""
+    """Travertine, honed. Default: vein-cut (fine horizontal layering, used
+    on tables). vertical=True: cross-cut (fleuri) for wall lining -- cloudy,
+    non-directional, with scattered open pores."""
     m, b = _new(name)
-    v = b.coords(scale=(1.0, 1.0, 1.0) if not vertical else (1.0, 1.0, 1.0))
-    bv = b.out(b.node("ShaderNodeMapping", {"Vector": v, "Scale": (0.25, 0.25, 1.0) if not vertical else (1.0, 1.0, 0.25)}), 0)
-    band = b.wave(bv, 5.5, distortion=1.6, detail=4.0, detail_scale=2.5, direction="Z" if not vertical else "X")
-    band2 = b.wave(bv, 17.0, distortion=1.1, detail=2.0, detail_scale=3.0, direction="Z" if not vertical else "X")
-    band = b.math("ADD", b.math("MULTIPLY", band, 0.7), b.math("MULTIPLY", band2, 0.3))
+    v = b.coords()
+    if vertical:
+        cloud = b.noise(v, 2.2, 5.0, 0.58, distortion=0.6)
+        band = b.math("ADD", b.math("MULTIPLY", cloud, 0.8), b.math("MULTIPLY", b.noise(v, 9.0, 3.0, 0.5), 0.2))
+    else:
+        bv = b.out(b.node("ShaderNodeMapping", {"Vector": v, "Scale": (0.25, 0.25, 1.0)}), 0)
+        band = b.wave(bv, 5.5, distortion=1.6, detail=4.0, detail_scale=2.5, direction="Z")
+        band2 = b.wave(bv, 17.0, distortion=1.1, detail=2.0, detail_scale=3.0, direction="Z")
+        band = b.math("ADD", b.math("MULTIPLY", band, 0.7), b.math("MULTIPLY", band2, 0.3))
     base = b.ramp(band, [(0.2, (0.50 * tone, 0.41 * tone, 0.30 * tone)), (0.55, (0.60 * tone, 0.51 * tone, 0.38 * tone)),
                          (0.85, (0.55 * tone, 0.46 * tone, 0.34 * tone))])
     mott = b.noise(v, 6.0, 5.0, 0.6)
     base = b.mixc(b.maprange(mott, 0.35, 0.65, 0.0, 0.14), base, (0.36, 0.28, 0.19), "MULTIPLY")
-    pv = b.out(b.node("ShaderNodeMapping", {"Vector": v, "Scale": (7.0, 7.0, 34.0) if not vertical else (34.0, 34.0, 7.0)}), 0)
+    pv = b.out(b.node("ShaderNodeMapping", {"Vector": v, "Scale": (7.0, 7.0, 34.0) if not vertical else (22.0, 22.0, 28.0)}), 0)
     pore = b.noise(pv, 1.0, 5.0, 0.7)
     poremask = b.maprange(pore, 0.62, 0.70, 0.0, 1.0)
     base = b.mixc(b.math("MULTIPLY", poremask, 0.75), base, (0.20, 0.15, 0.10))
@@ -285,10 +291,10 @@ def _mat_bronze(name, dark=1.0):
 def _mat_galvanised(name):
     m, b = _new(name)
     v = b.coords()
-    cells = b.voronoi(v, 16.0, feature="F1", out="Color")
+    cells = b.voronoi(v, 55.0, feature="F1", out="Color")
     cellv = b.out(b.node("ShaderNodeSeparateColor", {"Color": cells}), 0)
-    base = b.ramp(cellv, [(0.0, (0.46, 0.47, 0.48)), (1.0, (0.62, 0.63, 0.64))])
-    rough = b.maprange(cellv, 0.0, 1.0, 0.22, 0.46)
+    base = b.ramp(cellv, [(0.0, (0.53, 0.54, 0.55)), (1.0, (0.60, 0.61, 0.62))])
+    rough = b.maprange(cellv, 0.0, 1.0, 0.28, 0.38)
     smudge = b.noise(v, 2.0, 5.0, 0.6)
     rough = b.math("ADD", rough, b.maprange(smudge, 0.5, 0.8, 0.0, 0.15))
     b.surface(b.principled(base=base, metal=1.0, rough=rough), simple=dict(base=(0.55, 0.56, 0.57), metal=1.0, rough=0.34))

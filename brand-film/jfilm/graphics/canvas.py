@@ -152,7 +152,7 @@ class Graphics:
                 path.moveTo(float(x0), float(y0))
                 path.lineTo(float(x1), float(y1))
             self.stroke_path(path, color, level / 24.0, width, glow, glow_alpha)
-        if heads > 0 and progress is not None:
+        if heads > 0 and progress is not None and not occlude and len(P) == len(pr):
             live = (pr > 0.02) & (pr < 0.98)
             if live.any():
                 path = skia.Path()
@@ -163,6 +163,8 @@ class Graphics:
                 self.c.drawPath(path, self.paint(color, heads, fill=True))
 
     def _occlude(self, P, D, al, tol, step_px):
+        if len(P) == 0:
+            return P, al
         H, W = self.depth.shape
         L = np.hypot(*(P[:, 1] - P[:, 0]).T)
         k = np.clip(np.ceil(L / step_px), 1, 400).astype(int)

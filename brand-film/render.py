@@ -68,9 +68,14 @@ def _frame_worker(fmt_key, preview, frames, outdir, q):
     from jfilm.render.frame import FrameRenderer, write_png
     cfg = config.load()
     fr = FrameRenderer(fmt_key, preview=preview)
+    import traceback
     for i in frames:
         t = i / cfg.fps
-        img = fr.render(t, i)
+        try:
+            img = fr.render(t, i)
+        except Exception:
+            q.put(("error", i, traceback.format_exc()))
+            return
         write_png(Path(outdir) / f"f_{i:04d}.png", img)
         q.put(i)
 
@@ -103,7 +108,11 @@ def cmd_frames(args):
             p.start()
         done = 0
         while done < len(idx):
-            q.get()
+            msg = q.get()
+            if isinstance(msg, tuple):
+                for p in procs:
+                    p.terminate()
+                raise SystemExit(f"frame {msg[1]} failed:\n{msg[2]}")
             done += 1
             if done % 12 == 0 or done == len(idx):
                 el = time.time() - t0

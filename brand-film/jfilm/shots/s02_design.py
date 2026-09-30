@@ -61,7 +61,7 @@ class Shot(_Shot):
         h = self.clay_height(t)
         mat_on = float(E.smoothstep(E.lin(*O.MAT, t)))
         return Plate(state="finished", layers=layers, env=0.35 + 0.65 * mat_on,
-                     alpha=lambda P: smooth_front(P[:, 2], h, 0.45),
+                     alpha=lambda P: smooth_front(P[:, 2], h, 0.9),
                      sky_alpha=float(np.clip((h - 0.4) / 2.0, 0, 1)))
 
     def draw(self, t, g):

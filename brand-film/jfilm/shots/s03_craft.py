@@ -13,14 +13,14 @@ from .base import Cue, LayerSpec, Plate, Shot as _Shot
 
 A0, B0, C0, END = 8.0, 9.35, 10.7, 12.0
 
-CAM_A = CamState.look((-3.95, 8.40, 1.50), (-2.35, 8.87, 1.70), 21.0, focus=1.05, fstop=2.0)
+CAM_A = CamState.look((-2.20, 8.05, 1.20), (-1.50, 8.90, 1.45), 26.0, focus=1.05, fstop=2.2)
 CAM_B = CamState.look((1.22, 8.14, 1.04), (0.22, 9.02, 0.88), 24.0, focus=1.28, fstop=2.2)
-CAM_C = CamState.look((2.55, 1.85, 1.62), (1.55, 3.02, 4.28), 30.0, focus=2.9, fstop=3.2)
+CAM_C = CamState.look((1.60, 1.60, 1.60), (-0.60, 4.60, 4.30), 38.0, focus=4.0, fstop=4.0)
 
 PATHS = [
-    CamPath([(A0, CAM_A), (B0, CAM_A.with_(vfov=19.2, focus=1.15))]),
+    CamPath([(A0, CAM_A), (B0, CAM_A.with_(vfov=23.5, focus=1.12))]),
     CamPath([(B0, CAM_B), (C0, CAM_B.with_(vfov=22.4))]),
-    CamPath([(C0, CAM_C), (END, CAM_C.with_(vfov=28.0))]),
+    CamPath([(C0, CAM_C), (END, CAM_C.with_(vfov=35.0))]),
 ]
 
 
@@ -44,7 +44,7 @@ class Shot(_Shot):
             L = lights(daylight=1.0, down=float(E.smoothstep(E.lin(8.35, 8.95, t))), niche=1.0, cove=1.0)
             return Plate("finished", [LayerSpec("s03a", L)], exposure=0.15)
         if k == 1:
-            L = lights(daylight=1.0, down=1.0, cove=1.0, niche=float(E.smoothstep(E.lin(9.62, 10.2, t))))
+            L = lights(daylight=1.0, down=1.0, cove=1.0, niche=1.0)
             return Plate("finished", [LayerSpec("s03b", L)], exposure=0.0)
         seq = [float(E.smoothstep(E.lin(c, c + 0.45, t))) for c in (10.95, 11.12, 11.29, 11.46)]
         L = lights(daylight=0.8, down=1.0, niche=1.0, cove_seq=[seq[0], seq[2], seq[3], seq[1]])
@@ -58,5 +58,5 @@ class Shot(_Shot):
 
     def cues(self):
         return [Cue(A0, "cut", 0.6), Cue(8.35, "light_on", 0.55), Cue(8.35, "title_in", 0.7),
-                Cue(B0, "cut", 0.6), Cue(9.62, "light_on", 0.55), Cue(C0, "cut", 0.6)] + \
+                Cue(B0, "cut", 0.6), Cue(C0, "cut", 0.6)] + \
                [Cue(c, "light_on", 0.4) for c in (10.95, 11.12, 11.29, 11.46)]

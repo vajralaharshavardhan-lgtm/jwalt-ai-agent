@@ -158,9 +158,13 @@ def view_for(cam: CamState, fmt, reframe: dict | None = None, scale: float = 1.0
         v = rf.get(k, d)
         return float(v(t)) if callable(v) else float(v)
 
-    return View(cam, round(fmt.width * scale), round(fmt.height * scale),
-                fov_scale=val("fov_scale", fmt.fov_scale),
-                yaw_offset=val("yaw", 0.0), pitch_offset=val("pitch", 0.0), roll_offset=val("roll", 0.0))
+    v = View(cam, round(fmt.width * scale), round(fmt.height * scale),
+             fov_scale=val("fov_scale", fmt.fov_scale),
+             yaw_offset=val("yaw", 0.0), pitch_offset=val("pitch", 0.0), roll_offset=val("roll", 0.0))
+    d = np.array([val("dx", 0.0), val("dy", 0.0), val("dz", 0.0)])
+    if d.any():
+        v.t = v.t + d
+    return v
 
 
 # --- paths --------------------------------------------------------------
