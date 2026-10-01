@@ -114,9 +114,13 @@ class FrameRenderer:
                 if diff.any():
                     rgb1, cov1 = PJ.shade(vss, ids1, depth1, layers, env=env, env_lights=plate.env, moving=moving,
                                           env_ids=self.env_ids, max_id=self.max_id, only=diff)
+                    # what lies behind a fading object may be unseen by every
+                    # still: fill both passes first, or the hole blends in as black
+                    rgb = PJ.fill_holes(rgb, cover)
+                    rgb1 = PJ.fill_holes(rgb1, np.where(diff, cov1, 0))
                     a = (lut[ids1] * diff)[..., None]
                     rgb = rgb * (1 - a) + rgb1 * a
-                    cover = np.where(diff, np.maximum(cover, cov1), cover)
+                    cover = np.ones_like(cover)
                     depth = np.where(diff & (lut[ids1] > 0.5), depth1, depth)
         finally:
             for ob, m in saved:
